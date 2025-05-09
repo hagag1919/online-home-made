@@ -1,3 +1,4 @@
-com\yourcompany\orders\Jsf23Activator.class
 com\yourcompany\orders\ApplicationConfig.class
 com\yourcompany\orders\api\OrderResource.class
+com\yourcompany\orders\models\Order.class
+com\yourcompany\orders\models\Dish.class
