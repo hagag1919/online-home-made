@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "Orders")
 public class Order {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,7 +18,7 @@ public class Order {
     private Long restaurantID;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Dish> dishes;
+    private List<OrderDishes> dishes;
 
     @Column(nullable = false)
     private BigDecimal totalPrice;
@@ -51,10 +51,10 @@ public class Order {
     public void setRestaurantID(Long restaurantID) {
         this.restaurantID = restaurantID;
     }
-    public List<Dish> getDishes() {
+    public List<OrderDishes> getDishes() {
         return dishes;
     }
-    public void setDishes(List<Dish> dishes) {
+    public void setDishes(List<OrderDishes> dishes) {
         this.dishes = dishes;
     }
     public BigDecimal getTotalPrice() {
