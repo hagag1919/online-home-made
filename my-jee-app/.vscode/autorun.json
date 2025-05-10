@@ -1,9 +1,0 @@
-{
-    "commands": [
-      {
-        "match": "**/*.java",
-        "isBackground": true,
-        "command": "mvn clean package"
-      }
-    ]
-  }
