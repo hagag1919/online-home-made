@@ -46,5 +46,13 @@ public class SystemOrderRepo {
         entityManager.remove(order);
     }
 
+    // get all orders
+    public List<Order> getAllOrders() {
+        TypedQuery<Order> query = entityManager.createQuery(
+                "SELECT o FROM Order o", Order.class);
+        return query.getResultList();
+    }
+
+
 
 }

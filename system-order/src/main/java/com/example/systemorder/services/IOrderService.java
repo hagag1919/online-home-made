@@ -14,4 +14,7 @@ public interface IOrderService {
     public List<Order> getAllOrdersByUserID(Long userID);
     public List<Order> getAllOrdersByRestaurantID(Long restaurantID);
 
+    public List<Order> getAllOrders();
+
+
 }

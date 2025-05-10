@@ -1,6 +1,7 @@
 package com.example.systemorder.controllers;
 
 
+import com.example.systemorder.models.Order;
 import com.example.systemorder.services.IOrderService;
 import com.example.systemorder.utilities.OrderRequest;
 import jakarta.ejb.EJB;
@@ -42,6 +43,13 @@ public class OrderController {
                 orderRequest.getShippingCompany()
         );
         return Response.status(Response.Status.CREATED).build();
+    }
+
+    @GET
+    @Path("/getAllOrders")
+    public Response getAllOrders() {
+        List<Order> orders = orderService.getAllOrders();
+        return Response.ok(orders).build();
     }
 
 

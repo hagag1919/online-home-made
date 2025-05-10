@@ -1,6 +1,9 @@
 package com.example.systemorder.models;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 
@@ -15,6 +18,7 @@ public class OrderDishes {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonbTransient
     private Order order;
 
     @Column(nullable = false)

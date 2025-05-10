@@ -3,6 +3,7 @@ package com.example.systemorder.services;
 import com.example.systemorder.models.Order;
 import com.example.systemorder.models.OrderDishes;
 import com.example.systemorder.repo.SystemOrderRepo;
+import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -16,7 +17,7 @@ import java.util.List;
 @Stateless
 public class OrderService implements IOrderService{
 
-    @PersistenceContext
+    @EJB
     private SystemOrderRepo systemOrderRepo;
 
     @Override
@@ -29,12 +30,12 @@ public class OrderService implements IOrderService{
         order.setStatus("PENDING");
         order.setDishes(new ArrayList<>());
         order.setTotalPrice(new BigDecimal(0));
-//        for (Long dishID : dishIDs) {
-//            OrderDishes orderDish = new OrderDishes();
-//            orderDish.setId(dishID);
-//            orderDish.setOrder(order);
-//            order.getDishes().add(orderDish);
-//        }
+        for (Long dishID : dishIDs) {
+            OrderDishes orderDish = new OrderDishes();
+            orderDish.setId(dishID);
+            orderDish.setOrder(order);
+            order.getDishes().add(orderDish);
+        }
         systemOrderRepo.saveOrder(order);
     }
 
@@ -47,5 +48,10 @@ public class OrderService implements IOrderService{
     @Override
     public List<Order> getAllOrdersByRestaurantID(Long restaurantID) {
         return systemOrderRepo.getOrdersByRestaurantId(restaurantID);
+    }
+
+    @Override
+    public List<Order> getAllOrders() {
+        return  systemOrderRepo.getAllOrders();
     }
 }
