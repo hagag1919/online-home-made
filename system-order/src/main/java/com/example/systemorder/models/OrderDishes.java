@@ -7,9 +7,10 @@ import java.math.BigDecimal;
 
 
 @Entity
-@Table(name = "dishes")
-public class Dish {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Table(name = "OrderDishes")
+public class OrderDishes {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -58,6 +59,7 @@ public class Dish {
     public void setAmount(Integer amount) {
         this.amount = amount;
     }
+
     
 }
 
