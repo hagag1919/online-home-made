@@ -2,23 +2,19 @@ package com.example.systemorder.services;
 
 import com.example.systemorder.models.Order;
 import com.example.systemorder.models.OrderDishes;
-import com.example.systemorder.repo.SystemOrderRepo;
+import com.example.systemorder.repo.SystemOrderRepoLocal;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Stateless
-public class OrderService implements IOrderService{
+public class OrderService implements IOrderService {
 
     @EJB
-    private SystemOrderRepo systemOrderRepo;
+    private SystemOrderRepoLocal systemOrderRepo;
 
     @Override
     public void placeOrder(Long userID, Long restaurantID, List<Long> dishIDs, String destination, String shippingCompany) {
@@ -36,14 +32,13 @@ public class OrderService implements IOrderService{
             orderDish.setOrder(order);
             order.getDishes().add(orderDish);
         }
-        systemOrderRepo.saveOrder(order);
+        systemOrderRepo.placeOrder(order);
     }
 
     @Override
     public List<Order> getAllOrdersByUserID(Long userID) {
         return systemOrderRepo.getOrdersByUserId(userID);
     }
-
 
     @Override
     public List<Order> getAllOrdersByRestaurantID(Long restaurantID) {
@@ -52,6 +47,6 @@ public class OrderService implements IOrderService{
 
     @Override
     public List<Order> getAllOrders() {
-        return  systemOrderRepo.getAllOrders();
+        return systemOrderRepo.getAllOrders();
     }
 }

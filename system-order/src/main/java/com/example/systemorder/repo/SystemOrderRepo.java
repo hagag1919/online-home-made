@@ -1,58 +1,120 @@
+// filepath: d:\Level four\second semester\Distributed Systems\Microservices\system-order\src\main\java\com\example\systemorder\repo\SystemOrderRepo.java
 package com.example.systemorder.repo;
 
 import com.example.systemorder.models.Order;
-import jakarta.ejb.Singleton;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
-
+import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
-@Singleton
-public class SystemOrderRepo {
-    @PersistenceContext(unitName = "systemorderPU")
-    private EntityManager entityManager;
+@Stateless
+public class SystemOrderRepo implements SystemOrderRepoLocal {
 
-    public void saveOrder(Order order) {
-        entityManager.persist(order);
-    }
+    private static final Logger logger = Logger.getLogger(SystemOrderRepo.class.getName());
 
-    public Order findOrderById(Long id) {
-        return entityManager.find(Order.class, id);
-    }
+    @EJB
+    private DBConnection dbConnection;
 
-    public List<Order> getOrdersByUserId(Long userId) {
-        TypedQuery<Order> query = entityManager.createQuery(
-                "SELECT o FROM Order o WHERE o.userID = :userId", Order.class);
-        query.setParameter("userId", userId);
-        return query.getResultList();
-    }
+    @Override
+    public void placeOrder(Order order) {
+        String sql = "INSERT INTO Orders (userID, restaurantID, totalPrice, destination, shippingCompany, status) VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection conn = dbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-    public List<Order> getOrdersByRestaurantId(Long restaurantId) {
-        TypedQuery<Order> query = entityManager.createQuery(
-                "SELECT o FROM Order o WHERE o.restaurantID = :restaurantId", Order.class);
-        query.setParameter("restaurantId", restaurantId);
-        return query.getResultList();
-    }
+            stmt.setLong(1, order.getUserID());
+            stmt.setLong(2, order.getRestaurantID());
+            stmt.setBigDecimal(3, order.getTotalPrice());
+            stmt.setString(4, order.getDestination());
+            stmt.setString(5, order.getShippingCompany());
+            stmt.setString(6, order.getStatus());
 
-    public void updateOrder(Order order) {
-        entityManager.merge(order);
-    }
+            stmt.executeUpdate();
 
-    public void deleteOrder(Order order) {
-        if (!entityManager.contains(order)) {
-            order = entityManager.merge(order);
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    order.setId(generatedKeys.getLong(1));
+                }
+            }
+
+        } catch (SQLException e) {
+            logger.severe("Error placing order: " + e.getMessage());
+            throw new RuntimeException("Error placing order", e);
         }
-        entityManager.remove(order);
     }
 
-    // get all orders
+    @Override
+    public List<Order> getOrdersByUserId(Long userID) {
+        String sql = "SELECT * FROM Orders WHERE userID = ?";
+        List<Order> orders = new ArrayList<>();
+        try (Connection conn = dbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, userID);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                orders.add(mapResultSetToOrder(rs));
+            }
+
+        } catch (SQLException e) {
+            logger.severe("Error fetching orders by user ID: " + e.getMessage());
+        }
+
+        return orders;
+    }
+
+    @Override
+    public List<Order> getOrdersByRestaurantId(Long restaurantID) {
+        String sql = "SELECT * FROM Orders WHERE restaurantID = ?";
+        List<Order> orders = new ArrayList<>();
+        try (Connection conn = dbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, restaurantID);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                orders.add(mapResultSetToOrder(rs));
+            }
+
+        } catch (SQLException e) {
+            logger.severe("Error fetching orders by restaurant ID: " + e.getMessage());
+        }
+
+        return orders;
+    }
+
+    @Override
     public List<Order> getAllOrders() {
-        TypedQuery<Order> query = entityManager.createQuery(
-                "SELECT o FROM Order o", Order.class);
-        return query.getResultList();
+        String sql = "SELECT * FROM Orders";
+        List<Order> orders = new ArrayList<>();
+        try (Connection conn = dbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                orders.add(mapResultSetToOrder(rs));
+            }
+
+        } catch (SQLException e) {
+            logger.severe("Error fetching all orders: " + e.getMessage());
+        }
+
+        return orders;
     }
 
-
-
+    private Order mapResultSetToOrder(ResultSet rs) throws SQLException {
+        Order order = new Order();
+        order.setId(rs.getLong("id"));
+        order.setUserID(rs.getLong("userID"));
+        order.setRestaurantID(rs.getLong("restaurantID"));
+        order.setTotalPrice(rs.getBigDecimal("totalPrice"));
+        order.setDestination(rs.getString("destination"));
+        order.setShippingCompany(rs.getString("shippingCompany"));
+        order.setStatus(rs.getString("status"));
+        return order;
+    }
 }

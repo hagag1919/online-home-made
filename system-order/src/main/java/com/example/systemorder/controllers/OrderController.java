@@ -16,8 +16,8 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class OrderController {
-     @EJB
-     private IOrderService orderService;
+    @EJB
+    private IOrderService orderService;
 
         @GET
         @Path("/getAllOrdersByUserID")

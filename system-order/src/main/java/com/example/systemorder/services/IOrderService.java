@@ -1,9 +1,12 @@
 package com.example.systemorder.services;
 
 import com.example.systemorder.models.Order;
+import jakarta.ejb.Local;
 
 import java.util.List;
 
+
+@Local
 public interface IOrderService {
 
     //PlaceOrder
