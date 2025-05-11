@@ -1,6 +1,5 @@
 package com.example.systemorder.controllers;
 
-
 import com.example.systemorder.models.Order;
 import com.example.systemorder.services.IOrderService;
 import com.example.systemorder.utilities.OrderRequest;
@@ -16,20 +15,21 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class OrderController {
+
     @EJB
     private IOrderService orderService;
 
-        @GET
-        @Path("/getAllOrdersByUserID")
-        public Response getAllOrdersByUserID(Long userID) {
-            return Response.ok(orderService.getAllOrdersByUserID(userID)).build();
-        }
+    @GET
+    @Path("/getAllOrdersByUserID")
+    public Response getAllOrdersByUserID(@QueryParam("userID") Long userID) {
+        return Response.ok(orderService.getAllOrdersByUserID(userID)).build();
+    }
 
-        @GET
-        @Path("/getAllOrdersByRestaurantID")
-        public Response getAllOrdersByRestaurantID(Long restaurantID) {
-            return Response.ok(orderService.getAllOrdersByRestaurantID(restaurantID)).build();
-        }
+    @GET
+    @Path("/getAllOrdersByRestaurantID")
+    public Response getAllOrdersByRestaurantID(@QueryParam("restaurantID") Long restaurantID) {
+        return Response.ok(orderService.getAllOrdersByRestaurantID(restaurantID)).build();
+    }
 
     @POST
     @Path("/placeOrder")
@@ -51,6 +51,5 @@ public class OrderController {
         List<Order> orders = orderService.getAllOrders();
         return Response.ok(orders).build();
     }
-
 
 }
