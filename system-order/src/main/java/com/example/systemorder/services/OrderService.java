@@ -1,5 +1,6 @@
 package com.example.systemorder.services;
 
+import com.example.systemorder.message.SendOrderConfirm;
 import com.example.systemorder.models.Dish;
 import com.example.systemorder.models.Order;
 import com.example.systemorder.models.OrderDishes;
@@ -18,6 +19,9 @@ public class OrderService implements IOrderService {
 
     @EJB
     private SystemOrderRepoLocal systemOrderRepo;
+
+    @EJB
+    private SendOrderConfirm confirmPublisher;
 
     private static final double MIN_CHARGE = 10.0;
 
@@ -40,22 +44,33 @@ public class OrderService implements IOrderService {
             orderDishes.add(orderDish);
             totalPrice += calc.calcTotalPrice(dish.getPrice(), dish.getAmount()); //! this will change to the price of the dish from the restaurant service
         }
+        Order order = new Order();
+        order.setUserID(userID);
+        order.setRestaurantID(restaurantID);
+        order.setDestination(destination);
+        order.setShippingCompany(shippingCompany);
+        order.setDishes(orderDishes);
+        order.setTotalPrice(BigDecimal.valueOf(totalPrice));
+        order.setStatus("Pending");
 
-        if (calc.isAccepted(totalPrice, MIN_CHARGE)) {
-            Order order = new Order();
-            order.setUserID(userID);
-            order.setRestaurantID(restaurantID);
-            order.setDestination(destination);
-            order.setShippingCompany(shippingCompany);
-            order.setDishes(orderDishes);
-            order.setTotalPrice(BigDecimal.valueOf(totalPrice));
-            order.setStatus("Pending");
-            systemOrderRepo.placeOrder(order);
-
-        } else {
-            System.out.println("The total price is less than the minimum charge.");
+        // 1. Validate stock
+        // if (!inventory.hasStock(order)) {
+        //     confirmPublisher.send("failure",
+        //             "Order " + order.getId() + " failed: insufficient stock");
+        // Throw runtime exception to rollback DB (container-managed TX)
+        //     throw new RuntimeException("Insufficient stock");
+        // }
+        if (!calc.isAccepted(totalPrice, MIN_CHARGE)) {
+            confirmPublisher.send("failure",
+                    "Order " + order.getId() + " failed: total below minimum");
+            throw new RuntimeException("Below minimum charge");
 
         }
+
+        systemOrderRepo.placeOrder(order);
+
+        confirmPublisher.send("success",
+                "Order " + order.getId() + " placed successfully");
 
     }
 
