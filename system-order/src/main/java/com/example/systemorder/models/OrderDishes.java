@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 
-
 @Entity
 @Table(name = "OrderDishes")
 public class OrderDishes {
@@ -36,6 +35,12 @@ public class OrderDishes {
     }
     public void setId(Long id) {
         this.id = id;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
     public Order getOrder() {
         return order;

@@ -2,10 +2,12 @@ package com.example.systemorder.utilities;
 
 import java.util.List;
 
+import com.example.systemorder.models.Dish;
+
 public class OrderRequest {
     private Long userID;
     private Long restaurantID;
-    private List<Long> dishIDs;
+    private List<Dish> dishIDs;
     private String destination;
     private String shippingCompany;
 
@@ -23,10 +25,10 @@ public class OrderRequest {
     public void setRestaurantID(Long restaurantID) {
         this.restaurantID = restaurantID;
     }
-    public List<Long> getDishIDs() {
+    public List<Dish> getDishIDs() {
         return dishIDs;
     }
-    public void setDishIDs(List<Long> dishIDs) {
+    public void setDishIDs(List<Dish> dishIDs) {
         this.dishIDs = dishIDs;
     }
     public String getDestination() {

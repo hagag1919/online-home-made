@@ -1,8 +1,11 @@
 package com.example.systemorder.services;
 
+import com.example.systemorder.models.Dish;
 import com.example.systemorder.models.Order;
 import com.example.systemorder.models.OrderDishes;
 import com.example.systemorder.repo.SystemOrderRepoLocal;
+import com.example.systemorder.utilities.Calc;
+
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 
@@ -16,23 +19,44 @@ public class OrderService implements IOrderService {
     @EJB
     private SystemOrderRepoLocal systemOrderRepo;
 
+    private static final double MIN_CHARGE = 10.0;
+
+    private Calc calc = new Calc();
+
     @Override
-    public void placeOrder(Long userID, Long restaurantID, List<Long> dishIDs, String destination, String shippingCompany) {
-        Order order = new Order();
-        order.setUserID(userID);
-        order.setRestaurantID(restaurantID);
-        order.setDestination(destination);
-        order.setShippingCompany(shippingCompany);
-        order.setStatus("PENDING");
-        order.setDishes(new ArrayList<>());
-        order.setTotalPrice(new BigDecimal(0));
-        for (Long dishID : dishIDs) {
+    public void placeOrder(Long userID, Long restaurantID, List<Dish> dishes, String destination, String shippingCompany) {
+
+        //! Must do : make List<Dish> dishes to be List<Long> dishesID and gets the dishes from exposed api from restaurant service
+        //! Must do : check the amount of each dish and the total price of the order
+        List<OrderDishes> orderDishes = new ArrayList<>();
+        Double totalPrice = 0.0;
+
+        for (Dish dish : dishes) {
             OrderDishes orderDish = new OrderDishes();
-            orderDish.setId(dishID);
-            orderDish.setOrder(order);
-            order.getDishes().add(orderDish);
+            orderDish.setName(dish.getName());
+            orderDish.setPrice(BigDecimal.valueOf(dish.getPrice()));
+            orderDish.setAmount(dish.getAmount());
+            orderDish.setDescription(dish.getDescription());
+            orderDishes.add(orderDish);
+            totalPrice += calc.calcTotalPrice(dish.getPrice(), dish.getAmount()); //! this will change to the price of the dish from the restaurant service
         }
-        systemOrderRepo.placeOrder(order);
+
+        if (calc.isAccepted(totalPrice, MIN_CHARGE)) {
+            Order order = new Order();
+            order.setUserID(userID);
+            order.setRestaurantID(restaurantID);
+            order.setDestination(destination);
+            order.setShippingCompany(shippingCompany);
+            order.setDishes(orderDishes);
+            order.setTotalPrice(BigDecimal.valueOf(totalPrice));
+            order.setStatus("Pending");
+            systemOrderRepo.placeOrder(order);
+
+        } else {
+            System.out.println("The total price is less than the minimum charge.");
+
+        }
+
     }
 
     @Override
