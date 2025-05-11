@@ -1,5 +1,4 @@
-package com.example.systemorder;
-
+package com.example.restaurant;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;

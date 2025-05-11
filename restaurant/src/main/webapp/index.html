@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Service API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f7f7f7;
+            border-left: 4px solid #3498db;
+        }
+        code {
+            background-color: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Restaurant Service API</h1>
+        
+        <h2>About</h2>
+        <p>This service provides an API for restaurant sellers to manage their dishes and view order history in the online homemade food ordering system.</p>
+        
+        <h2>Available Endpoints</h2>
+        <ul>
+            <li><code>POST /api/auth/login</code> - Authenticate restaurant seller</li>
+            <li><code>GET /api/restaurants/{restaurantId}/dishes</code> - Get all dishes for a restaurant</li>
+            <li><code>POST /api/restaurants/{restaurantId}/dishes</code> - Add a new dish</li>
+            <li><code>PUT /api/restaurants/{restaurantId}/dishes/{dishId}</code> - Update a dish</li>
+            <li><code>DELETE /api/restaurants/{restaurantId}/dishes/{dishId}</code> - Delete a dish</li>
+            <li><code>GET /api/restaurants/{restaurantId}/orders</code> - Get order history</li>
+        </ul>
+        
+        <h2>Testing</h2>
+        <p>Access <code>/api/bootstrap/init</code> to initialize test data for development purposes.</p>
+        
+        <h2>Documentation</h2>
+        <p>For full API documentation, please refer to the project README.</p>
+    </div>
+</body>
+</html>
