@@ -3,27 +3,32 @@ package com.example.systemorder.repo;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
-import javax.sql.DataSource;
-import jakarta.annotation.Resource;
+
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
+// ...existing code...
 @Singleton
 @Startup
 public class DBConnection {
-
-    @Resource(lookup = "java:/jdbc/ordersdb")  // JNDI name you configure in your app server
-    private DataSource ds;
+    private static final String URL = "jdbc:mysql://localhost:3306/ordersdb";
+    private static final String USER = "root";
+    private static final String PASSWORD = "123456";
 
     @PostConstruct
-    private void init() {
-        // nothing required here if DataSource is configured in container
+    public void init() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("MySQL JDBC Driver not found", e);
+        }
     }
-
     public Connection getConnection() {
         try {
-            return ds.getConnection();
+            return DriverManager.getConnection(URL, USER, PASSWORD);
         } catch (SQLException e) {
+            // This is where your error message originates
             throw new RuntimeException("Error connecting to the database", e);
         }
     }
