@@ -39,10 +39,10 @@ public class AccountService {
         return accountRepo.findAll();
     }
 
-    public ResponseEntity<String> createAccount(String name){
+    public ResponseEntity<Account> createAccount(String name){
 
         if (accountRepo.findByName(name) != null) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Account already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         } else {
             Account account = new Account();
             account.setName(name);
@@ -50,7 +50,7 @@ public class AccountService {
             String password = AccountUtils.generateRandomPassword(8);
             account.setPassword(password);
             accountRepo.save(account);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Account created");
+            return ResponseEntity.status(HttpStatus.CREATED).body(account);
 
         }
     }
