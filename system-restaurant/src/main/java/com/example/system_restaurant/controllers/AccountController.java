@@ -21,7 +21,7 @@ public class AccountController {
 
     // Method to create a new account
     @PostMapping("/createAccount")
-    public ResponseEntity<String> createAccount (@RequestBody Account account) {
+    public ResponseEntity<Account> createAccount (@RequestBody Account account) {
         String name = account.getName();
         return accountService.createAccount(name);
     }

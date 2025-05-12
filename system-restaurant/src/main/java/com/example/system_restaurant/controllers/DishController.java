@@ -2,13 +2,14 @@ package com.example.system_restaurant.controllers;
 import com.example.system_restaurant.models.Dish;
 import com.example.system_restaurant.repo.DishRepo;
 import com.example.system_restaurant.services.DishService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
@@ -29,8 +30,8 @@ public class DishController {
         return dishService.getDishesByRestaurantId(restaurantId);
     }
 
-    @PostMapping("/create/{restaurantId}")
-    public ResponseEntity<String> createDish(@RequestBody Dish dish, @PathVariable Long restaurantId) {
+    @PostMapping("/create")
+    public ResponseEntity<String> createDish(@RequestBody Dish dish, @RequestParam Long restaurantId) {
         dish.setRestaurantId(restaurantId);
         if (dish.getName() == null || dish.getPrice() == 0 || dish.getDescription() == null) {
             return ResponseEntity.badRequest().body("Invalid dish data");
@@ -39,8 +40,8 @@ public class DishController {
         return dishService.createDish(dish);
     }
 
-    @PutMapping("/update/{restaurantId}/{id}")
-    public ResponseEntity<String> updateDish(@PathVariable Long restaurantId,@RequestBody Dish dish, @PathVariable Long id) {
+    @PutMapping("/update/")
+    public ResponseEntity<String> updateDish(@RequestParam Long restaurantId,@RequestBody Dish dish, @RequestParam Long id) {
         return dishService.updateDish(restaurantId, dish, id);
     }
 
