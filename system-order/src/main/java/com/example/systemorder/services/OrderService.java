@@ -1,5 +1,9 @@
 package com.example.systemorder.services;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.example.systemorder.message.SendOrderConfirm;
 import com.example.systemorder.models.Dish;
 import com.example.systemorder.models.Order;
@@ -9,10 +13,6 @@ import com.example.systemorder.utilities.Calc;
 
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 @Stateless
 public class OrderService implements IOrderService {
@@ -62,7 +62,7 @@ public class OrderService implements IOrderService {
         // }
         if (!calc.isAccepted(totalPrice, MIN_CHARGE)) {
             confirmPublisher.send("failure",
-                    "Order " + order.getId() + " failed: total below minimum");
+                    "Order " + order.getId() + " failed: total below minimum", userID);
             throw new RuntimeException("Below minimum charge");
 
         }
@@ -70,7 +70,7 @@ public class OrderService implements IOrderService {
         systemOrderRepo.placeOrder(order);
 
         confirmPublisher.send("success",
-                "Order " + order.getId() + " placed successfully");
+                "Order " + order.getId() + " placed successfully", userID);
 
     }
 
