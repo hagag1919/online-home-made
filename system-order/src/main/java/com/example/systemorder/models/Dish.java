@@ -2,6 +2,7 @@ package com.example.systemorder.models;
 
 
 public class Dish {
+    private Long id;
     private String name;
     private Double price;
     private Integer amount;
@@ -10,11 +11,12 @@ public class Dish {
     public Dish() {
     }
     
-    public Dish(String name, Double price, Integer amount, String description) {
+    public Dish(Long id,String name, Double price, Integer amount, String description) {
         this.name = name;
         this.price = price;
         this.amount = amount;
         this.description = description;
+        this.id = id;
     }
 
     public String getName() {
@@ -44,10 +46,17 @@ public class Dish {
     public void setDescription(String description) {
         this.description = description;
     }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     @Override
     public String toString() {
         return "Dish{" +
+                "id=" + id +
                 "name='" + name + '\'' +
                 ", price=" + price +
                 ", amount=" + amount +

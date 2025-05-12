@@ -1,0 +1,97 @@
+{
+  "info": {
+    "name": "System Order API",
+    "_postman_id": "b3b3f6f3-2f3a-4415-91bb-50fbb9ac3d2c",
+    "description": "Test endpoints for placing and retrieving orders.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Place Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userID\": 1,\n  \"restaurantID\": 2,\n  \"dishIDs\": [101, 102],\n  \"destination\": \"123 Main Street\",\n  \"shippingCompany\": \"FastExpress\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/system-order-1.0-SNAPSHOT/api/order/placeOrder",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "system-order-1.0-SNAPSHOT",
+            "api",
+            "order",
+            "placeOrder"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Orders by User ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/system-order-1.0-SNAPSHOT/api/order/getAllOrdersByUserID?userID=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "system-order-1.0-SNAPSHOT",
+            "api",
+            "order",
+            "getAllOrdersByUserID"
+          ],
+          "query": [
+            {
+              "key": "userID",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Orders by Restaurant ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/system-order-1.0-SNAPSHOT/api/order/getAllOrdersByRestaurantID?restaurantID=2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "system-order-1.0-SNAPSHOT",
+            "api",
+            "order",
+            "getAllOrdersByRestaurantID"
+          ],
+          "query": [
+            {
+              "key": "restaurantID",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
