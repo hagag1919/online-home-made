@@ -3,6 +3,8 @@ package com.example.user.repo;
 import com.example.user.models.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -18,6 +20,10 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
      * @return Optional containing the account if found
      */
     Optional<Account> findByUsername(String username);
+
+    List<Account> findAll();
+
+    Optional<Account> findById(Long id);
     
     /**
      * Check if an account with the given username exists

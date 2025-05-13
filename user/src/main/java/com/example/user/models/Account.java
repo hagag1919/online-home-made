@@ -5,12 +5,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.ToString;
 
 import java.util.Date;
+
+import com.fasterxml.jackson.databind.util.Named;
 
 /**
  * Account entity representing the user account in the system.
@@ -22,16 +26,24 @@ import java.util.Date;
 @Entity
 @Table(name = "users")
 @ToString
+@NamedQueries({
+    // get all users
+    // get user by username
+
+    @NamedQuery(name = "Account.findAll", query = "SELECT a FROM Account a"),
+    @NamedQuery(name = "Account.findByUsername", query = "SELECT a FROM Account a WHERE a.username = :username"),
+    @NamedQuery(name = "Account.findById", query = "SELECT a FROM Account a WHERE a.id = :id"),
+})
 public class Account {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(name  = "username", nullable = false, unique = true, length = 50)
     private String username;
     
-    @Column(nullable = false)
+    @Column(name = "password",nullable = false)
     private String password;
 
     
