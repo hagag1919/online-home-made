@@ -1,31 +1,29 @@
--- Create the database
-CREATE DATABASE IF NOT EXISTS OrdersDB;
-USE OrdersDB;
-
--- Create the Orders table
-CREATE TABLE Orders (
-                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                        userID BIGINT NOT NULL,
-                        restaurantID BIGINT NOT NULL,
-                        totalPrice DECIMAL(10, 2) NOT NULL,
-                        destination VARCHAR(255) NOT NULL,
-                        shippingCompany VARCHAR(255) NOT NULL,
-                        status VARCHAR(100) NOT NULL
+create database ordersdb;
+use database ordersdb;
+create table orders
+(
+    id               int auto_increment
+        primary key,
+    user_id          int                            not null,
+    restaurant_id    int                            not null,
+    total_price      decimal(10, 2)                 not null,
+    destination      varchar(255)                   not null,
+    shipping_company varchar(100)                   null,
+    status           varchar(255) default 'Pending' null
 );
 
--- Create the OrderDishes table
-CREATE TABLE OrderDishes (
-                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                             order_id BIGINT NOT NULL,
-                             name VARCHAR(255) NOT NULL,
-                             amount INT NOT NULL,
-                             price DECIMAL(10, 2) NOT NULL,
-                             description TEXT,
-                             CONSTRAINT fk_order
-                                 FOREIGN KEY (order_id)
-                                     REFERENCES Orders(id)
-                                     ON DELETE CASCADE
+create table orderdishes
+(
+    id          int auto_increment
+        primary key,
+    order_id    int            not null,
+    name        varchar(100)   not null,
+    amount      int            not null,
+    price       decimal(10, 2) not null,
+    description text           null,
+    constraint orderdishes_ibfk_1
+        foreign key (order_id) references orders (id)
 );
 
-ALTER TABLE Orders
-    ADD COLUMN status VARCHAR(255) DEFAULT 'Pending';
+create index order_id
+    on orderdishes (order_id);

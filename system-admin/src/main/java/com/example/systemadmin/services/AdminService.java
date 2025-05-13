@@ -1,6 +1,7 @@
 package com.example.systemadmin.services;
 
 import com.example.systemadmin.utils.CompanyAccountResponse;
+import com.example.systemadmin.utils.Cutomer;
 import com.example.systemadmin.utils.Dish;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -27,9 +28,6 @@ public class AdminService {
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
             try {
-//                restTemplate.postForEntity("http://localhost:8082/createAccount", request, Void.class);
-//                // get the response that be like:
-//                // { "id": 6,"name": "companyName", "password": "generatedPassword" }
                 ResponseEntity<CompanyAccountResponse> response = restTemplate.postForEntity(
                         "http://localhost:8082/createAccount",
                         request,
@@ -69,6 +67,22 @@ public class AdminService {
             return Collections.emptyList();
         }
     }
+    public List<Cutomer> getAllUsers() {
+        try {
+            ResponseEntity<Cutomer[]> response = restTemplate.getForEntity(
+                    "http://localhost:8083/accounts/all", // URL of user service
+                    Cutomer[].class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return Arrays.asList(response.getBody());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
 
     private String generatePassword() {
         return UUID.randomUUID().toString().substring(0, 8); // 8-char random password
