@@ -45,7 +45,7 @@ public class DishController {
         return dishService.updateDish(restaurantId, dish, id);
     }
 
-    @GetMapping("/getbyids")
+    @PostMapping("/getbyids")
     public ResponseEntity<List<Dish>> getDishesByIds(@RequestBody List<Long> ids) {
         List<Dish> dishes = dishRepo.findAllById(ids);
         if (dishes.isEmpty()) {

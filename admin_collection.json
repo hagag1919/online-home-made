@@ -1,0 +1,57 @@
+{
+  "info": {
+    "name": "Admin Service API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "c36f39fe-b03b-44da-8a26-6b1f4f728c1f"
+  },
+  "item": [
+    {
+      "name": "Create Company Accounts",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"companyNames\": [\"PizzaKing\", \"BurgerQueen\", \"TacoTown\"]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8088/admin/create-company-accounts",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8088",
+          "path": ["admin", "create-company-accounts"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List Dishes",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "[1, 2, 3]"
+        },
+        "url": {
+          "raw": "http://localhost:8088/admin/list-dishes",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8088",
+          "path": ["admin", "list-dishes"]
+        }
+      },
+      "response": []
+    }
+  ]
+}

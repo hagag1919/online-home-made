@@ -20,6 +20,7 @@ public class RabbitMQSetup {
         try (Connection conn = factory.newConnection();
              Channel channel = conn.createChannel()) {
 
+            // Declare order exchange
             channel.exchangeDeclare("order_exchange", "direct", true);
 
             channel.queueDeclare("order_success_queue", true, false, false, null);
@@ -27,6 +28,13 @@ public class RabbitMQSetup {
 
             channel.queueBind("order_success_queue", "order_exchange", "success");
             channel.queueBind("order_failure_queue", "order_exchange", "failure");
+
+            // Declare log exchange
+            channel.exchangeDeclare("log_exchange", "topic", true);
+
+            // Admin listens to error logs
+            channel.queueDeclare("admin_error_logs", true, false, false, null);
+            channel.queueBind("admin_error_logs", "log_exchange", "*.Error");
 
         } catch (Exception e) {
             e.printStackTrace();
