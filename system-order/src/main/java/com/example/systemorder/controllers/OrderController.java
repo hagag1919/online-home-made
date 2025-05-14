@@ -41,6 +41,7 @@ public class OrderController {
                 orderRequest.getDishIDs(),
                 orderRequest.getDestination(),
                 orderRequest.getShippingCompany()
+                , orderRequest.getTotalPrice()
         );
         return Response.status(Response.Status.CREATED).build();
     }

@@ -1,10 +1,17 @@
 package com.example.system_restaurant.models;
 
-import jakarta.persistence.*;
-import lombok.ToString;
-
 import java.io.Serializable;
 import java.util.Objects;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import lombok.ToString;
 
 @Entity
 @Table(name = "dishes")
@@ -13,7 +20,9 @@ import java.util.Objects;
     @NamedQuery(name = "Dish.findAll", query = "SELECT d FROM Dish d"),
     @NamedQuery(name = "Dish.findById", query = "SELECT d FROM Dish d WHERE d.id = :id"),
     @NamedQuery(name = "Dish.findByName", query = "SELECT d FROM Dish d WHERE d.name = :name"),
-    @NamedQuery(name = "Dish.findByRestaurant", query = "SELECT d FROM Dish d WHERE d.restaurantId = :restaurantId")
+    @NamedQuery(name = "Dish.findByRestaurant", query = "SELECT d FROM Dish d WHERE d.restaurantId = :restaurantId"),
+    @NamedQuery(name = "Dish.isAvailable", query = "SELECT CASE WHEN COUNT(d) > 0 THEN true ELSE false END FROM Dish d WHERE d.id = :dishId AND d.amount >= :amount"),
+    @NamedQuery(name = "Dish.updateAmount", query = "UPDATE Dish d SET d.amount = d.amount - :amount WHERE d.id = :dishId AND d.amount >= :amount"),
 })
 public class Dish implements Serializable {
     
