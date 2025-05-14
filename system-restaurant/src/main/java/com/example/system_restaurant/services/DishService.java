@@ -59,7 +59,20 @@ public class DishService {
         existingDish.setName(dish.getName());
         existingDish.setPrice(dish.getPrice());
         existingDish.setDescription(dish.getDescription());
+        existingDish.setAmount(dish.getAmount());
         dishRepo.save(existingDish);
         return ResponseEntity.ok("Dish updated successfully");
+    }
+
+    public ResponseEntity<String> deleteDish(Long id, Long restaurantId) {
+        Dish existingDish = dishRepo.findById(id).orElse(null);
+        if (existingDish == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if(existingDish.getRestaurantId() != restaurantId) {
+            return ResponseEntity.status(403).body("You do not have permission to delete this dish");
+        }
+        dishRepo.delete(existingDish);
+        return ResponseEntity.ok("Dish deleted successfully");
     }
 }

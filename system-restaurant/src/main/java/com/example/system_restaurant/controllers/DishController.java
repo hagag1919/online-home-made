@@ -4,6 +4,8 @@ import com.example.system_restaurant.repo.DishRepo;
 import com.example.system_restaurant.services.DishService;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/dishes")
+@CrossOrigin(origins = "*")
 public class DishController {
 
     private final DishRepo dishRepo;
@@ -23,11 +26,6 @@ public class DishController {
     public DishController(DishService dishService, DishRepo dishRepo) {
         this.dishService = dishService;
         this.dishRepo = dishRepo;
-    }
-
-
-    public ResponseEntity<List<Dish>> getDishesByRestaurantId(Long restaurantId) {
-        return dishService.getDishesByRestaurantId(restaurantId);
     }
 
     @PostMapping("/create")
@@ -40,9 +38,9 @@ public class DishController {
         return dishService.createDish(dish);
     }
 
-    @PutMapping("/update/")
-    public ResponseEntity<String> updateDish(@RequestParam Long restaurantId,@RequestBody Dish dish, @RequestParam Long id) {
-        return dishService.updateDish(restaurantId, dish, id);
+    @PutMapping("/update")
+    public ResponseEntity<String> updateDish(@RequestParam Long restaurantId,@RequestBody Dish dish, @RequestParam Long dishId) {
+        return dishService.updateDish(restaurantId, dish, dishId);
     }
 
     @PostMapping("/getbyids")
@@ -52,6 +50,21 @@ public class DishController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(dishes);
+    }
+
+    @GetMapping("/getbyrestaurantid")
+    public ResponseEntity<List<Dish>> getDishesByRestaurantId(@RequestParam Long restaurantId) {
+        List<Dish> dishes = dishRepo.findByRestaurantId(restaurantId);
+        if (dishes.isEmpty()) {
+            // return that there are no dishes not 404
+            return ResponseEntity.ok().body(List.of());
+        }
+        return ResponseEntity.ok(dishes);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteDish(@RequestParam Long DishId, @RequestParam Long restaurantId) {
+        return dishService.deleteDish(DishId , restaurantId);
     }
         
 }

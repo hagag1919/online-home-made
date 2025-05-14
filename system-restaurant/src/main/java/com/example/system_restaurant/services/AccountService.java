@@ -55,14 +55,14 @@ public class AccountService {
         }
     }
 
-    public ResponseEntity<String> login (String name, String password) {
+    public ResponseEntity<?> login (String name, String password) {
         Account account = accountRepo.findByName(name);
         if (account == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
         } else if (!account.getPassword().equals(password)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid password");
         } else {
-            return ResponseEntity.ok("Login successful");
+            return ResponseEntity.ok(account);
         }
     }
     

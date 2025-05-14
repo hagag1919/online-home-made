@@ -7,11 +7,13 @@ import com.example.system_restaurant.models.Account;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
 @Controller
+@CrossOrigin(origins = "*")
 public class AccountController {
     // This class will handle the HTTP requests related to accounts
     // It will use the AccountService to perform the operations
@@ -28,7 +30,7 @@ public class AccountController {
 
     // Method to login to an account
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Account account) {
+    public ResponseEntity<?> login(@RequestBody Account account) {
         String name = account.getName();
         String password = account.getPassword();
         return accountService.login(name, password);
