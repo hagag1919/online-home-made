@@ -1,9 +1,16 @@
 package com.example.systemorder.models;
 
-import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Orders")
@@ -31,6 +38,19 @@ public class Order {
 
     @Column(nullable = false)
     private String status;
+
+    public Order(Long userID, Long restaurantID, List<OrderDishes> dishes,
+                 BigDecimal totalPrice, String destination, String shippingCompany) {
+        this.userID = userID;
+        this.restaurantID = restaurantID;
+        this.dishes = dishes;
+        this.totalPrice = totalPrice;
+        this.destination = destination;
+        this.shippingCompany = shippingCompany;
+        this.status = "Pending";
+    }
+    public Order() {
+    }
 
     // Getters and Setters
     public Long getId() {

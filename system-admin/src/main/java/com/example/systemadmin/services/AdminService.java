@@ -1,8 +1,13 @@
 package com.example.systemadmin.services;
 
+import com.example.systemadmin.models.PaymentFailure;
+import com.example.systemadmin.models.ServiceLog;
+import com.example.systemadmin.repos.IPaymentFailureRepo;
+import com.example.systemadmin.repos.IServiceLogRepo;
 import com.example.systemadmin.utils.CompanyAccountResponse;
 import com.example.systemadmin.utils.Cutomer;
 import com.example.systemadmin.utils.Dish;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -13,15 +18,30 @@ import java.util.*;
 public class AdminService {
 
     private final RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    private final IPaymentFailureRepo paymentFailureRepository;
+    @Autowired
+    private final IServiceLogRepo serviceLogRepository;
+
+    public AdminService(IPaymentFailureRepo paymentFailureRepository, IServiceLogRepo serviceLogRepository) {
+        this.paymentFailureRepository = paymentFailureRepository;
+        this.serviceLogRepository = serviceLogRepository;
+    }
+
+    public List<PaymentFailure> getAllPaymentFailures() {
+        return paymentFailureRepository.findAll();
+    }
+
+    public List<ServiceLog> getAllServiceLogs() {
+        return serviceLogRepository.findAll();
+    }
 
     public List<CompanyAccountResponse> createCompanyAccounts(List<String> names) {
         List<CompanyAccountResponse> responses = new ArrayList<>();
 
         for (String name : names) {
-            //String password = generatePassword();
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("name", name);
-            //requestBody.put("password", password);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -84,7 +104,4 @@ public class AdminService {
     }
 
 
-    private String generatePassword() {
-        return UUID.randomUUID().toString().substring(0, 8); // 8-char random password
-    }
 }

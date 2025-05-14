@@ -1,9 +1,17 @@
 package com.example.systemorder.models;
 
-import jakarta.json.bind.annotation.JsonbTransient;
-import jakarta.persistence.*;
-
 import java.math.BigDecimal;
+
+import jakarta.json.bind.annotation.JsonbTransient;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 
 @Entity
@@ -27,7 +35,18 @@ public class OrderDishes {
     @Column(nullable = false)
     private BigDecimal price;
 
+    @Column(nullable = false)
     private String description;
+
+    public OrderDishes(String name, int amount, BigDecimal price, String description) {
+        this.name = name;
+        this.amount = amount;
+        this.price = price;
+        this.description = description;
+    }
+    public OrderDishes() {
+        // Default constructor
+    }
 
     // Getters and Setters
     public Long getId() {

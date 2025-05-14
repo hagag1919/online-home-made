@@ -9,81 +9,79 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.MessageProperties;
 
-import jakarta.ejb.EJBException;
 import jakarta.ejb.Stateless;
 
 @Stateless
 public class SendOrderConfirm {
-    private static final String EXCHANGE = "order_exchange";
-    private static final String LOG_EXCHANGE = "log_exchange";
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    public void send(String routingKey, String message, Long userId) {
-        send(routingKey, message, userId, null, null, null);
+    private static final ObjectMapper M = new ObjectMapper();
+    private ConnectionFactory factory;
+    {
+        factory = new ConnectionFactory();
+        factory.setHost("localhost");
     }
 
-    public void send(String routingKey, String message, Long userId,
+    public void send(String routingKey, String msg, Long userId) {
+        send("order_exchange", routingKey, msg, userId, null, null, null);
+    }
+
+    public void send(String type, String routingKey, String msg, Long userId,
                      String paymentId, Double amount, String currency) {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        try (Connection c = factory.newConnection();
+             Channel ch = c.createChannel()) {
 
-        String userQueue = "order_status_user_" + userId;
+            ch.confirmSelect();
+            Map<String,Object> p = new HashMap<>();
+            p.put("type", routingKey);
+            p.put("userId", userId);
+            p.put("paymentId", paymentId);
+            p.put("amount", amount);
+            p.put("currency", currency);
+            p.put("reason", msg);
+            String json = M.writeValueAsString(p);
 
-        try (Connection conn = factory.newConnection();
-             Channel channel = conn.createChannel()) {
+            // Direct or payments exchange
+            String exch = type.equals("payments_exchange")
+                          ? "payments_exchange" : "order_exchange";
+            ch.basicPublish(exch, routingKey,
+                MessageProperties.PERSISTENT_TEXT_PLAIN, json.getBytes());
 
-            channel.confirmSelect();
+            // customer queue
+            String userQ = "order_status_user_" + userId;
+            ch.queueDeclare(userQ,true,false,false,null);
+            ch.basicPublish("", userQ,
+                MessageProperties.PERSISTENT_TEXT_PLAIN, json.getBytes());
 
-            Map<String, Object> payload = new HashMap<>();
-            payload.put("type", routingKey);
-            payload.put("userId", userId);
-            payload.put("paymentId", paymentId);
-            payload.put("amount", amount);
-            payload.put("currency", currency);
-            payload.put("reason", message);
-
-            String jsonMessage = mapper.writeValueAsString(payload);
-
-            // Send to direct exchange for admin listener
-            channel.basicPublish(EXCHANGE, routingKey,
-                    MessageProperties.PERSISTENT_TEXT_PLAIN,
-                    jsonMessage.getBytes("UTF-8"));
-
-            // Send to user-specific queue for UI or notifications
-            channel.queueDeclare(userQueue, true, false, false, null);
-            channel.basicPublish("", userQueue,
-                    MessageProperties.PERSISTENT_TEXT_PLAIN,
-                    jsonMessage.getBytes("UTF-8"));
-
-            channel.waitForConfirmsOrDie(5000);
+            ch.waitForConfirmsOrDie(5_000);
         } catch (Exception e) {
-            throw new EJBException("Failed to send RabbitMQ message", e);
+            throw new RuntimeException(e);
         }
     }
 
-    public void log(String serviceName, String message, String severity) {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+    public void log(String service, String message, String severity) {
+        try (Connection c = factory.newConnection();
+             Channel ch = c.createChannel()) {
 
-        try (Connection conn = factory.newConnection();
-             Channel channel = conn.createChannel()) {
+            ch.confirmSelect();
+            Map<String, Object> logMessage = new HashMap<>();
+            logMessage.put("service", service);
+            logMessage.put("message", message);
+            logMessage.put("severity", severity);
+            String json = M.writeValueAsString(logMessage);
 
-            channel.exchangeDeclare(LOG_EXCHANGE, "topic", true);
+            // Sanitize service and severity to ensure valid routing key
+            String sanitizedService = service.replaceAll("[^\\w]", "_");
+            String sanitizedSeverity = severity.replaceAll("[^\\w]", "_");
 
-            Map<String, Object> logPayload = new HashMap<>();
-            logPayload.put("serviceName", serviceName);
-            logPayload.put("severity", severity);
-            logPayload.put("message", message);
+            // Construct routing key
+            String routingKey = sanitizedService + "." + sanitizedSeverity;
 
-            String jsonLog = mapper.writeValueAsString(logPayload);
+            ch.basicPublish("log_exchange", routingKey,
+                    MessageProperties.PERSISTENT_TEXT_PLAIN, json.getBytes());
 
-            String routingKey = serviceName + "_" + severity;
-            channel.basicPublish(LOG_EXCHANGE, routingKey,
-                    MessageProperties.PERSISTENT_TEXT_PLAIN,
-                    jsonLog.getBytes("UTF-8"));
-
+            ch.waitForConfirmsOrDie(5_000);
         } catch (Exception e) {
-            throw new EJBException("Failed to send log message", e);
+            throw new RuntimeException("Failed to log message", e);
         }
     }
+
 }

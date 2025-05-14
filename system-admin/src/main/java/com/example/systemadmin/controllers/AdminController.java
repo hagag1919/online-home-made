@@ -1,5 +1,7 @@
 package com.example.systemadmin.controllers;
 
+import com.example.systemadmin.models.PaymentFailure;
+import com.example.systemadmin.models.ServiceLog;
 import com.example.systemadmin.services.AdminService;
 import com.example.systemadmin.utils.CompanyAccountRequest;
 import com.example.systemadmin.utils.CompanyAccountResponse;
@@ -17,6 +19,16 @@ public class AdminController {
 
     @Autowired
     private AdminService adminService;
+
+    @GetMapping("/payment-failures")
+    public ResponseEntity<List<PaymentFailure>> getPaymentFailures() {
+        return ResponseEntity.ok(adminService.getAllPaymentFailures());
+    }
+
+    @GetMapping("/service-logs")
+    public ResponseEntity<List<ServiceLog>> getServiceLogs() {
+        return ResponseEntity.ok(adminService.getAllServiceLogs());
+    }
 
     @PostMapping("/create-company-accounts")
     public ResponseEntity<List<CompanyAccountResponse>> createAccounts(@RequestBody CompanyAccountRequest request) {

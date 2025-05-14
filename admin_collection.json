@@ -6,6 +6,34 @@
   },
   "item": [
     {
+      "name": "Get Payment Failures",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8088/admin/payment-failures",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8088",
+          "path": ["admin", "payment-failures"]
+        }
+      }
+    },
+    {
+      "name": "Get Service Logs",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8088/admin/service-logs",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8088",
+          "path": ["admin", "service-logs"]
+        }
+      }
+    },
+    {
       "name": "Create Company Accounts",
       "request": {
         "method": "POST",
@@ -54,17 +82,17 @@
       "response": []
     },
     {
-            "name": "List All Users",
-            "request": {
-                "method": "GET",
-                "url": {
-                    "raw": "http://localhost:8088/admin/list-users",
-                    "protocol": "http",
-                    "host": ["localhost"],
-                    "port": "8088",
-                    "path": ["admin", "list-users"]
-                }
-            }
+      "name": "List All Users",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8088/admin/list-users",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8088",
+          "path": ["admin", "list-users"]
         }
+      }
+    }
   ]
 }

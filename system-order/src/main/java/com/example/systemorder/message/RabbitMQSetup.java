@@ -13,31 +13,31 @@ import jakarta.ejb.Startup;
 public class RabbitMQSetup {
 
     @PostConstruct
-    public void setupQueuesAndExchange() {
+    public void init() throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
-
         try (Connection conn = factory.newConnection();
-             Channel channel = conn.createChannel()) {
+             Channel ch = conn.createChannel()) {
 
-            // Declare order exchange
-            channel.exchangeDeclare("order_exchange", "direct", true);
+            // Order direct exchange (success/failure)
+            ch.exchangeDeclare("order_exchange", "direct", true);
+            ch.queueDeclare("order_success_queue", true, false, false, null);
+            ch.queueDeclare("order_failure_queue", true, false, false, null);
+            ch.queueBind("order_success_queue", "order_exchange", "success");
+            ch.queueBind("order_failure_queue", "order_exchange", "failure");
 
-            channel.queueDeclare("order_success_queue", true, false, false, null);
-            channel.queueDeclare("order_failure_queue", true, false, false, null);
+            // Payments direct exchange
+            ch.exchangeDeclare("payments_exchange", "direct", true);
+            ch.queueDeclare("payment_failure_queue", true, false, false, null);
+            ch.queueBind("payment_failure_queue", "payments_exchange", "payment_failure");
 
-            channel.queueBind("order_success_queue", "order_exchange", "success");
-            channel.queueBind("order_failure_queue", "order_exchange", "failure");
+            // Log topic exchange
+            ch.exchangeDeclare("log_exchange", "topic", true);
 
-            // Declare log exchange
-            channel.exchangeDeclare("log_exchange", "topic", true);
-
-            // Admin listens to error logs
-            channel.queueDeclare("admin_error_logs", true, false, false, null);
-            channel.queueBind("admin_error_logs", "log_exchange", "*.Error");
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            ch.queueDeclare("log_queue", true, false, false, null);
+            ch.queueBind("log_queue", "log_exchange", "#.Error");   // Match all services with severity "Error"
+            ch.queueBind("log_queue", "log_exchange", "#.Warning"); // Match all services with severity "Warning"
+            ch.queueBind("log_queue", "log_exchange", "#.Info");    // Match all services with severity "Info"
         }
     }
 }
