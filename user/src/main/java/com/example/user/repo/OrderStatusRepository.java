@@ -11,4 +11,5 @@ public interface OrderStatusRepository extends JpaRepository<OrderStatus, Long> 
 
     @Override
     List<OrderStatus> findAll();
+    List<OrderStatus> findByUserId(Long userId);
 }

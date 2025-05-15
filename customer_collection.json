@@ -1,0 +1,114 @@
+{
+  "info": {
+    "name": "UserService API",
+    "_postman_id": "f45a1aa7-b4f9-49e3-91f4-1234567890ab",
+    "description": "Collection to test Account and Restaurant endpoints on http://localhost:8083",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register Account",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"testpass\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8083/accounts/register",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8083",
+          "path": ["accounts", "register"]
+        }
+      }
+    },
+    {
+      "name": "Login Account",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"testpass\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8083/accounts/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8083",
+          "path": ["accounts", "login"]
+        }
+      }
+    },
+    {
+      "name": "Get All Accounts",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8083/accounts/all",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8083",
+          "path": ["accounts", "all"]
+        }
+      }
+    },
+    {
+      "name": "Get Account by ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8083/accounts/getbyid?id=1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8083",
+          "path": ["accounts", "getbyid"],
+          "query": [{ "key": "id", "value": "1" }]
+        }
+      }
+    },
+    {
+      "name": "Get Order Status by User ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8083/accounts/getOrderStatus?userId=1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8083",
+          "path": ["accounts", "getOrderStatus"],
+          "query": [{ "key": "userId", "value": "1" }]
+        }
+      }
+    },
+    {
+      "name": "Get All Restaurants",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8083/restaurants/getall",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8083",
+          "path": ["restaurants", "getall"]
+        }
+      }
+    },
+    {
+      "name": "Get Dishes by Restaurant ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8083/restaurants/getbyrestaurantid?restaurantId=1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8083",
+          "path": ["restaurants", "getbyrestaurantid"],
+          "query": [{ "key": "restaurantId", "value": "1" }]
+        }
+      }
+    }
+  ]
+}

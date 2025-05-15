@@ -1,5 +1,7 @@
 package com.example.user.controllers;
 import com.example.user.models.Account;
+import com.example.user.models.OrderStatus;
+import com.example.user.repo.OrderStatusRepository;
 import com.example.user.services.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,9 +18,13 @@ public class AccountControllers {
     
     @Autowired
     private final AccountService accountService;
+
+    @Autowired
+    private final OrderStatusRepository orderStatusRepository;
     
-    public AccountControllers(AccountService accountService) {
+    public AccountControllers(AccountService accountService, OrderStatusRepository orderStatusRepository) {
         this.accountService = accountService;
+        this.orderStatusRepository = orderStatusRepository;
     }
     
     /**
@@ -81,5 +87,15 @@ public class AccountControllers {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
         }
+    }
+    @GetMapping("/getOrderStatus")
+    public  ResponseEntity<?> getOrderStatus(@RequestParam Long userId) {
+        List<OrderStatus> orderStatuses = orderStatusRepository.findByUserId(userId);
+        if (orderStatuses != null && !orderStatuses.isEmpty()) {
+            return ResponseEntity.ok(orderStatuses);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No order status found for this user");
+        }
+
     }
 }
