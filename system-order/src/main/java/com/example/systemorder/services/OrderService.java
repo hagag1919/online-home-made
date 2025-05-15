@@ -58,16 +58,16 @@ public class OrderService implements IOrderService {
 
             // Create and save the order
             Order order = createOrder(userID, restaurantID, qtyMap, totalPrice, destination, shippingCompany);
-            systemOrderRepo.placeOrder(order);
+           // systemOrderRepo.placeOrder(order);
 
             // Process payment
-            boolean paymentSuccessful = processPayment(userID, totalPrice);
+            boolean paymentSuccessful = processPayment(userID, totalPrice,dishes);
             if (!paymentSuccessful) {
                 handlePaymentFailure(userID);
             }
 
             // Mark order as completed
-            completeOrder(order, userID);
+            completeOrder(order, userID,dishes);
 
         } catch (Exception ex) {
             throw new RuntimeException("Order processing failed", ex);
@@ -148,14 +148,14 @@ public class OrderService implements IOrderService {
     }
 
     private void handleStockUnavailable(Long userID) {
-        confirmPublisher.send("failure", "Order failed: insufficient stock at restaurant", userID);
+        confirmPublisher.send("failure", "Order failed: insufficient stock at restaurant", userID,null);
         confirmPublisher.log("OrderService", "Order failed: insufficient stock at restaurant for user=" + userID, "Error");
         throw new RuntimeException("Insufficient stock at restaurant");
     }
 
     private void validateTotalPrice(Long userID, Double totalPrice) {
         if (totalPrice < MIN_CHARGE) {
-            confirmPublisher.send("failure", "Order failed: must be at least " + MIN_CHARGE, userID);
+            confirmPublisher.send("failure", "Order failed: must be at least " + MIN_CHARGE, userID,null);
             confirmPublisher.log("OrderService", "Order below minimum charge: user=" + userID + " total=" + totalPrice, "Error");
             throw new RuntimeException("Below minimum charge");
         }
@@ -167,36 +167,36 @@ public class OrderService implements IOrderService {
         return new Order(userID, restaurantID, dishIds, BigDecimal.valueOf(totalPrice), destination, shippingCompany);
     }
 
-    private boolean processPayment(Long userID, double totalPrice) {
+    private boolean processPayment(Long userID, double totalPrice, List<Map<String, Object>> dishes) {
         String paymentId = UUID.randomUUID().toString();
         try {
             boolean success = true; // Simulate payment processing
             if (success) {
-                confirmPublisher.send("payments_exchange", "payment_success", "Payment processed", userID, paymentId, totalPrice, "EGP");
+                confirmPublisher.send("payments_exchange", "payment_success", "Payment processed", userID, paymentId, totalPrice, "EGP",dishes);
                 confirmPublisher.log("OrderService", "Payment succeeded: user=" + userID + " paymentId=" + paymentId, "Info");
                 return true;
             } else {
-                confirmPublisher.send("payments_exchange", "payment_failure", "Payment failure", userID, paymentId, totalPrice, "EGP");
+                confirmPublisher.send("payments_exchange", "payment_failure", "Payment failure", userID, paymentId, totalPrice, "EGP",dishes);
                 confirmPublisher.log("OrderService", "Payment failed: user=" + userID + " paymentId=" + paymentId, "Error");
                 return false;
             }
         } catch (Exception e) {
-            confirmPublisher.send("payments_exchange", "payment_failure", "Payment error: " + e.getMessage(), userID, paymentId, totalPrice, "EGP");
+            confirmPublisher.send("payments_exchange", "payment_failure", "Payment error: " + e.getMessage(), userID, paymentId, totalPrice, "EGP",dishes);
             confirmPublisher.log("OrderService", "Payment exception: " + e.getMessage(), "Error");
             return false;
         }
     }
 
     private void handlePaymentFailure(Long userID) {
-        confirmPublisher.send("failure", "Order failed: payment error", userID);
+        confirmPublisher.send("failure", "Order failed: payment error", userID,null);
         confirmPublisher.log("OrderService", "Order failed: payment error for user=" + userID, "Error");
         throw new RuntimeException("PaymentFailed");
     }
 
-    private void completeOrder(Order order, Long userID) {
+    private void completeOrder(Order order, Long userID,List<Map<String, Object>> dishes) {
         order.setStatus("Completed");
         systemOrderRepo.placeOrder(order);
-        confirmPublisher.send("success", "Order placed successfully", userID);
+        confirmPublisher.send("success", "Order placed successfully", userID,dishes);
         confirmPublisher.log("OrderService", "Order completed for user=" + userID + " orderId=" + order.getId(), "Info");
     }
 

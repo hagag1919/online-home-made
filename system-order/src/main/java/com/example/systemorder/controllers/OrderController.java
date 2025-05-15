@@ -43,7 +43,7 @@ public class OrderController {
                 orderRequest.getShippingCompany()
                 , orderRequest.getTotalPrice()
         );
-        return Response.status(Response.Status.CREATED).build();
+        return Response.accepted().entity("Order received, being processed.").build();
     }
 
     @GET

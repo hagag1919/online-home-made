@@ -15,4 +15,9 @@ public class RabbitConsumerConfig {
     public Queue replayStockAvailability() {
         return new Queue("response_stock", true);
     }
+
+    @Bean
+    public Queue orderStatus() {
+        return new Queue("order_success_queue", true);
+    }
 }

@@ -47,16 +47,26 @@ public class RestaurantRabbitListener {
             response.put("userId", userId);
             response.put("available", available);
             rabbitTemplate.convertAndSend("response_stock", response.toString());
-//            if(available)
-//            {
-//                for (JsonNode dish : dishes) {
-//                    Long dishId = dish.get("dishId").asLong();
-//                    int amount = dish.get("amount").asInt();
-//                    dishRepo.updateAmount(dishId, amount);
-//                }
-//            }
         } catch (Exception e) {
             // Optionally log the error
         }
     }
+
+    @RabbitListener(queues = "order_success_queue")
+    public void handleOrderSuccess(String message) {
+        try {
+            JsonNode json = mapper.readTree(message);
+            JsonNode dishes = json.get("dishes");
+
+            for (JsonNode dish : dishes) {
+                Long dishId = dish.get("dishId").asLong();
+                int amount = dish.get("amount").asInt();
+                dishRepo.updateAmount(dishId, amount);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error processing order success message: " + e.getMessage());
+        }
+    }
+
 }

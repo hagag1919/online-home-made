@@ -1,29 +1,33 @@
 create database ordersdb;
 use database ordersdb;
-create table orders
+create table Orders
 (
-    id               int auto_increment
+    id               bigint auto_increment
         primary key,
     user_id          int                            not null,
     restaurant_id    int                            not null,
     total_price      decimal(10, 2)                 not null,
     destination      varchar(255)                   not null,
     shipping_company varchar(100)                   null,
-    status           varchar(255) default 'Pending' null
+    status           varchar(255) default 'Pending' null,
+    dishes           json                           not null
 );
 
-create table orderdishes
+create table order_dishes_link
 (
-    id          int auto_increment
-        primary key,
-    order_id    int            not null,
-    name        varchar(100)   not null,
-    amount      int            not null,
-    price       decimal(10, 2) not null,
-    description text           null,
-    constraint orderdishes_ibfk_1
+    order_id bigint not null,
+    dish_id  bigint not null,
+    primary key (order_id, dish_id),
+    constraint order_dishes_link_ibfk_1
         foreign key (order_id) references orders (id)
 );
 
-create index order_id
-    on orderdishes (order_id);
+create index idx_order_id
+    on order_dishes_link (order_id);
+
+create index idx_restaurant_id
+    on Orders (restaurant_id);
+
+create index idx_user_id
+    on Orders (user_id);
+

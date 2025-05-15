@@ -62,6 +62,7 @@ public void placeOrder(Order order) {
                     linkStmt.addBatch();
                 }
                 linkStmt.executeBatch();
+
             }
         }
 

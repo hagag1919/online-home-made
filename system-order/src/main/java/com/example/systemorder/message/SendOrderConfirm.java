@@ -1,6 +1,7 @@
 package com.example.systemorder.message;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,12 +21,12 @@ public class SendOrderConfirm {
         factory.setHost("localhost");
     }
 
-    public void send(String routingKey, String msg, Long userId) {
-        send("order_exchange", routingKey, msg, userId, null, null, null);
+    public void send(String routingKey, String msg, Long userId,List<Map<String, Object>> dishes) {
+        send("order_exchange", routingKey, msg, userId, null, null, null, dishes);
     }
 
     public void send(String type, String routingKey, String msg, Long userId,
-                     String paymentId, Double amount, String currency) {
+                     String paymentId, Double amount, String currency, List<Map<String, Object>> dishes) {
         try (Connection c = factory.newConnection();
              Channel ch = c.createChannel()) {
 
@@ -37,6 +38,7 @@ public class SendOrderConfirm {
             p.put("amount", amount);
             p.put("currency", currency);
             p.put("reason", msg);
+            p.put("dishes", dishes);
             String json = M.writeValueAsString(p);
 
             // Direct or payments exchange

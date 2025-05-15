@@ -19,7 +19,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"userID\": 1,\n  \"restaurantID\": 2,\n  \"destination\": \"123 Main St, Cityville\",\n  \"shippingCompany\": \"FastShip Co.\",\n  \"dishIDs\": [\n    {\n      \"dishID\": 101,\n      \"quantity\": 2\n    },\n    {\n      \"dishID\": 102,\n      \"quantity\": 1\n    }\n  ]\n}\n"
+					"raw": "{\n  \"userID\": 1,\n  \"restaurantID\": 2,\n  \"destination\": \"123 Main St, Cityville\",\n  \"shippingCompany\": \"FastShip Co.\",\n  \"dishIDs\": [\n    {\n      \"dishID\": 1,\n      \"quantity\": 2\n    },\n    {\n      \"dishID\": 2,\n      \"quantity\": 1\n    }\n  ],\n  \"totalPrice\": 80.9\n}\n"
 				},
 				"url": {
 					"raw": "http://localhost:8080/system-order-1.0-SNAPSHOT/api/order/placeOrder",
