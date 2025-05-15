@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { createOrder } from '../services/api';
+import { createOrder, getAllRestaurants, getDishesByRestaurantId } from '../services/api';
 import { useAuth } from '../services/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './styles.css';
@@ -10,28 +10,42 @@ function UserDashboard() {
   const [dishes, setDishes] = useState([]);
   const [selectedDishes, setSelectedDishes] = useState([]);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [orderError, setOrderError] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Mock data for restaurants - replace with actual API call
+  // Fetch real restaurants data from API
   useEffect(() => {
-    // Fetch restaurants from API
-    setRestaurants([
-      { id: 1, name: "Mom's Kitchen", cuisine: "Home Cooking" },
-      { id: 2, name: "Taste of India", cuisine: "Indian" },
-      { id: 3, name: "Homemade Italian", cuisine: "Italian" }
-    ]);
+    const fetchRestaurants = async () => {
+      try {
+        const response = await getAllRestaurants();
+        setRestaurants(response.data.map(restaurant => ({
+          ...restaurant // Adding default cuisine as it's used in UI
+        })));
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch restaurants:', error);
+        setLoading(false);
+      }
+    };
+    
+    fetchRestaurants();
   }, []);
 
   useEffect(() => {
     // Fetch restaurant's dishes when a restaurant is selected
     if (selectedRestaurant) {
-      // Replace with actual API call
-      setDishes([
-        { id: 1, name: "Spaghetti Bolognese", price: 12.99, description: "Homemade pasta with rich meat sauce" },
-        { id: 2, name: "Lasagna", price: 14.99, description: "Layered pasta with cheese and meat sauce" },
-        { id: 3, name: "Garlic Bread", price: 4.99, description: "Freshly baked bread with garlic butter" }
-      ]);
+      const fetchDishes = async () => {
+        try {
+          const response = await getDishesByRestaurantId(selectedRestaurant.id);
+          setDishes(response.data);
+        } catch (error) {
+          console.error('Failed to fetch dishes:', error);
+        }
+      };
+      
+      fetchDishes();
     }
   }, [selectedRestaurant]);
 
@@ -44,41 +58,73 @@ function UserDashboard() {
     if (selectedDishes.find(d => d.id === dish.id)) {
       setSelectedDishes(selectedDishes.filter(d => d.id !== dish.id));
     } else {
-      setSelectedDishes([...selectedDishes, { ...dish, quantity: 1 }]);
+      // Only add dish if amount is greater than 0
+      if (dish.amount > 0) {
+        setSelectedDishes([...selectedDishes, { ...dish, quantity: 1 }]);
+      }
     }
   };
 
   const handleQuantityChange = (dishId, quantity) => {
-    setSelectedDishes(
-      selectedDishes.map(dish => 
-        dish.id === dishId ? { ...dish, quantity } : dish
-      )
-    );
+    // Find the dish in the dishes array to check its amount
+    const dish = dishes.find(d => d.id === dishId);
+    // Only update if the new quantity is within the available amount
+    if (dish && quantity <= dish.amount) {
+      setSelectedDishes(
+        selectedDishes.map(d => 
+          d.id === dishId ? { ...d, quantity } : d
+        )
+      );
+    }
   };
 
   const handleCreateOrder = async () => {
     if (!selectedDishes.length || !selectedRestaurant) return;
     
     try {
+      // Calculate total price
+      const totalPrice = selectedDishes.reduce(
+        (sum, dish) => sum + (dish.price * dish.quantity), 
+        0
+      );
+      
       const orderData = {
-        restaurantId: selectedRestaurant.id,
-        userId: currentUser.id,
-        items: selectedDishes.map(dish => ({
+        userID: currentUser?.id || 1, // Use currentUser.id if available, fallback to 1
+        restaurantID: selectedRestaurant.id,
+        orderDishes: selectedDishes.map(dish => ({
           dishId: dish.id,
-          quantity: dish.quantity
-        }))
+          dishName: dish.name,
+          quantity: dish.quantity,
+          unitPrice: dish.price
+        })),
+        destination: currentUser?.address || "123 Main Street", // You may want to add address to user profile
+        shippingCompany: "FastDelivery", // This could be a selection in the future
+        totalPrice: totalPrice
       };
       
-      await createOrder(orderData);
-      setOrderSuccess(true);
-      setSelectedDishes([]);
+      const response = await createOrder(orderData);
       
-      // Reset success message after 3 seconds
-      setTimeout(() => {
-        setOrderSuccess(false);
-      }, 3000);
+      if (response.status === 202) {
+        setOrderSuccess(true);
+        setSelectedDishes([]);
+        
+        // Reset success message after 3 seconds
+        setTimeout(() => {
+          setOrderSuccess(false);
+        }, 3000);
+      } else {
+        console.error('Order was not accepted:', response);
+        setOrderError(true);
+        setTimeout(() => {
+          setOrderError(false);
+        }, 3000);
+      }
     } catch (err) {
       console.error('Failed to create order:', err);
+      setOrderError(true);
+      setTimeout(() => {
+        setOrderError(false);
+      }, 3000);
     }
   };
 
@@ -114,47 +160,66 @@ function UserDashboard() {
         {selectedRestaurant && (
           <div className="dishes-section">
             <h2>Dishes from {selectedRestaurant.name}</h2>
-            <div className="dish-list">
-              {dishes.map(dish => {
-                const isSelected = selectedDishes.some(d => d.id === dish.id);
-                const selectedDish = selectedDishes.find(d => d.id === dish.id);
-                
-                return (
-                  <div key={dish.id} className={`dish-card ${isSelected ? 'selected' : ''}`}>
-                    <div className="dish-info">
-                      <h3>{dish.name}</h3>
-                      <p>{dish.description}</p>
-                      <p className="dish-price">${dish.price}</p>
+            {dishes.length > 0 ? (
+              <div className="dish-list">
+                {dishes.map(dish => {
+                  const isSelected = selectedDishes.some(d => d.id === dish.id);
+                  const selectedDish = selectedDishes.find(d => d.id === dish.id);
+                  
+                  return (
+                    <div key={dish.id} className={`dish-card ${isSelected ? 'selected' : ''} ${dish.amount <= 0 ? 'out-of-stock' : ''}`}>
+                      <div className="dish-info">
+                        <h3>{dish.name}</h3>
+                        <p>{dish.description}</p>
+                        <p className="dish-price">${dish.price}</p>
+                        <p className="dish-availability">
+                          {dish.amount > 0 
+                            ? `Available: ${dish.amount}` 
+                            : <span className="out-of-stock-text">Out of stock</span>
+                          }
+                        </p>
+                      </div>
+                      <div className="dish-actions">
+                        <button 
+                          onClick={() => handleDishToggle(dish)}
+                          className={isSelected ? 'remove-dish' : 'add-dish'}
+                          disabled={!isSelected && dish.amount <= 0}
+                        >
+                          {isSelected ? 'Remove' : 'Add to Order'}
+                        </button>
+                        
+                        {isSelected && (
+                          <div className="quantity-selector">
+                            <button 
+                              onClick={() => handleQuantityChange(dish.id, Math.max(1, selectedDish.quantity - 1))}
+                              disabled={selectedDish.quantity <= 1}
+                              aria-label="Decrease quantity"
+                            >
+                              <span style={{color:"black"}}>-</span>
+                            </button>
+                            <span>{selectedDish.quantity}</span>
+                            <button 
+                              onClick={() => handleQuantityChange(dish.id, selectedDish.quantity + 1)}
+                              disabled={selectedDish.quantity >= dish.amount}
+                              aria-label="Increase quantity"
+                            >
+                              <span style={{color:"black"}}>+</span>
+                            </button>
+                          </div>
+                        )}
+                        {isSelected && selectedDish.quantity === dish.amount && (
+                          <p className="max-quantity-warning">Maximum available reached</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="dish-actions">
-                      <button 
-                        onClick={() => handleDishToggle(dish)}
-                        className={isSelected ? 'remove-dish' : 'add-dish'}
-                      >
-                        {isSelected ? 'Remove' : 'Add to Order'}
-                      </button>
-                      
-                      {isSelected && (
-                        <div className="quantity-selector">
-                          <button 
-                            onClick={() => handleQuantityChange(dish.id, Math.max(1, selectedDish.quantity - 1))}
-                            disabled={selectedDish.quantity <= 1}
-                          >
-                            -
-                          </button>
-                          <span>{selectedDish.quantity}</span>
-                          <button 
-                            onClick={() => handleQuantityChange(dish.id, selectedDish.quantity + 1)}
-                          >
-                            +
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="no-dishes-message">
+                <p>This restaurant doesn't offer any dishes at the moment.</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -181,7 +246,13 @@ function UserDashboard() {
             
             {orderSuccess && (
               <div className="success-message">
-                Your order has been placed successfully!
+                Your order has been placed successfully! Your food is being prepared.
+              </div>
+            )}
+            
+            {orderError && (
+              <div className="error-message">
+                Failed to place order. Please try again later.
               </div>
             )}
           </div>

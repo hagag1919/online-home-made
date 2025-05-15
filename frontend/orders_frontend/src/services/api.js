@@ -30,9 +30,19 @@ export const loginRestaurant = (restaurantData) => {
   return restaurantAPI.post('/login', restaurantData);
 };
 
+export const getAllRestaurants = () => {
+  return userAPI.get('/restaurants/getall', {
+    headers: {
+    }
+  });
+};
+
 // Dish API calls
 export const getDishesByRestaurantId = (restaurantId) => {
-  return restaurantAPI.get(`/dishes/getbyrestaurantid?restaurantId=${restaurantId}`);
+  return userAPI.get(`/restaurants/getbyrestaurantid?restaurantId=${restaurantId}`, {
+    headers: {
+    }
+  });
 };
 
 export const createDish = (restaurantId, dishData) => {
@@ -47,7 +57,18 @@ export const deleteDish = (restaurantId, dishId) => {
   return restaurantAPI.delete(`/dishes/delete?restaurantId=${restaurantId}&DishId=${dishId}`);
 };
 
-// Order API calls (to be implemented)
+// Order API calls
 export const createOrder = (orderData) => {
-  return userAPI.post('/orders/create', orderData);
+  const config = {
+    method: 'post',
+    url: 'http://localhost:8080/system-order-1.0-SNAPSHOT/api/order/placeOrder',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Accept': '*/*',
+      'Origin': window.location.origin
+    },
+    data: orderData
+  };
+  
+  return axios.request(config);
 };
