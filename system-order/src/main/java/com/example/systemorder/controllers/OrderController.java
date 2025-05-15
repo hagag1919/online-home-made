@@ -1,6 +1,7 @@
 package com.example.systemorder.controllers;
 
 import com.example.systemorder.models.Order;
+import com.example.systemorder.models.OrderDish;
 import com.example.systemorder.services.IOrderService;
 import com.example.systemorder.utilities.OrderRequest;
 import jakarta.ejb.EJB;
@@ -43,7 +44,8 @@ public class OrderController {
                 orderRequest.getShippingCompany(),
                 orderRequest.getTotalPrice()
         );
-        return Response.accepted().entity("Order received, being processed.").build();
+        return Response.accepted()
+                .entity("Order received, being processed.").build();
     }
 
     @GET
@@ -57,12 +59,21 @@ public class OrderController {
     @Path("/getOrderDishesByOrderID")
     public Response getOrderDishesByOrderID(@QueryParam("orderID") Long orderID) {
         List<Order> orders = orderService.getAllOrders();
+        boolean orderExists = false;
+        
         for (Order order : orders) {
             if (order.getId().equals(orderID)) {
-                return Response.ok(order.getOrderDishes()).build();
+                orderExists = true;
+                List<OrderDish> orderDishes = orderService.getOrderDishesByOrderID(orderID);
+                return Response.ok(orderDishes).build();
             }
         }
-        return Response.status(Response.Status.NOT_FOUND).entity("Order not found").build();
+        
+        if (!orderExists) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Order not found").build();
+        }
+        
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error retrieving order dishes").build();
     }
 
 }

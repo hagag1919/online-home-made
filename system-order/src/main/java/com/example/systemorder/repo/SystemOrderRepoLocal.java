@@ -1,6 +1,7 @@
 package com.example.systemorder.repo;
 
 import com.example.systemorder.models.Order;
+import com.example.systemorder.models.OrderDish;
 
 import java.util.List;
 
@@ -12,4 +13,6 @@ public interface SystemOrderRepoLocal {
     List<Order> getOrdersByRestaurantId(Long restaurantID);
 
     List<Order> getAllOrders();
+    
+    List<OrderDish> getOrderDishesByOrderId(Long orderId);
 }

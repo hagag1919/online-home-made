@@ -14,8 +14,7 @@ public interface IOrderService {
     public void placeOrder(Long userID, Long restaurantID, List<OrderDish> orderDishs, String destination, String shippingCompany,Double totalPrice);
     public List<Order> getAllOrdersByUserID(Long userID);
     public List<Order> getAllOrdersByRestaurantID(Long restaurantID);
-
     public List<Order> getAllOrders();
-
+    public List<OrderDish> getOrderDishesByOrderID(Long orderID);
 
 }

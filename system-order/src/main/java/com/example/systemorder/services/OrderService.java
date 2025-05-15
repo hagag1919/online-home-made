@@ -44,6 +44,7 @@ public class OrderService implements IOrderService {
     public void placeOrder(Long userID, Long restaurantID, List<OrderDish> orderDishs,
                            String destination, String shippingCompany, Double totalPrice) {
         try {
+            System.out.println("Here 1");
             // Prepare stock request
             List<RequestDishs> dishsAndAmounts = orderDishs.stream()
                     .map(dish -> new RequestDishs(dish.getDishId(), dish.getQuantity()))
@@ -51,26 +52,31 @@ public class OrderService implements IOrderService {
             Map<Long, Integer> qtyMap = mapDishQuantities(dishsAndAmounts);
             List<Map<String, Object>> dishes = prepareDishDetails(qtyMap);
 
+            System.out.println("Here 2");
             // Check stock availability
             boolean stockAvailable = checkStockAvailability(userID, dishes);
             if (!stockAvailable) {
                 handleStockUnavailable(userID);
             }
+            System.out.println("Here 3");
+
 
             // Validate total price
             validateTotalPrice(userID, totalPrice);
-
+            System.out.println("Here 4");
             // Create and save the order
             Order order = createOrder(userID, restaurantID,  orderDishs, totalPrice, destination, shippingCompany);
-
+            System.out.println("Here 5");
             // Process payment
             boolean paymentSuccessful = processPayment(userID, totalPrice,dishes);
             if (!paymentSuccessful) {
                 handlePaymentFailure(userID);
             }
+            System.out.println("Here 6");
 
             // Mark order as completed
             completeOrder(order, userID,dishes);
+            System.out.println("Here 7");
 
         } catch (Exception ex) {
             throw new RuntimeException("Order processing failed", ex);
@@ -227,5 +233,10 @@ public class OrderService implements IOrderService {
     @Override
     public List<Order> getAllOrders() {
         return systemOrderRepo.getAllOrders();
+    }
+    
+    @Override
+    public List<OrderDish> getOrderDishesByOrderID(Long orderID) {
+        return systemOrderRepo.getOrderDishesByOrderId(orderID);
     }
 }

@@ -95,7 +95,7 @@ public void placeOrder(Order order) {
 
     @Override
     public List<Order> getOrdersByUserId(Long userID) {
-        String sql = "SELECT * FROM Orders WHERE user_id = ?";
+        String sql = "SELECT * FROM orders WHERE user_id = ?";
         List<Order> orders = new ArrayList<>();
         try (Connection conn = dbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -120,7 +120,7 @@ public void placeOrder(Order order) {
     @Override
     public List<Order> getOrdersByRestaurantId(Long restaurantID) {
         // Adjusted column name to snake_case
-        String sql = "SELECT * FROM Orders WHERE restaurant_id = ?";
+        String sql = "SELECT * FROM orders WHERE restaurant_id = ?";
         List<Order> orders = new ArrayList<>();
         try (Connection conn = dbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -143,7 +143,7 @@ public void placeOrder(Order order) {
 
     @Override
     public List<Order> getAllOrders() {
-        String sql = "SELECT * FROM Orders";
+        String sql = "SELECT * FROM orders";
         List<Order> orders = new ArrayList<>();
         try (Connection conn = dbConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -173,6 +173,33 @@ public void placeOrder(Order order) {
         order.setShippingCompany(rs.getString("shipping_company"));
         order.setStatus(rs.getString("status"));
         return order;
+    }
+    
+    public List<OrderDish> getOrderDishesByOrderId(Long orderId) {
+        String sql = "SELECT * FROM order_dishes WHERE order_id = ?";
+        List<OrderDish> orderDishes = new ArrayList<>();
+        
+        try (Connection conn = dbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, orderId);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                OrderDish dish = new OrderDish();
+                dish.setId(rs.getLong("id"));
+                dish.setDishId(rs.getLong("dish_id"));
+                dish.setDishName(rs.getString("dish_name"));
+                dish.setQuantity(rs.getInt("quantity"));
+                dish.setUnitPrice(rs.getBigDecimal("unit_price"));
+                orderDishes.add(dish);
+            }
+            
+        } catch (SQLException e) {
+            logger.severe("Error fetching order dishes by order ID: " + e.getMessage());
+        }
+        
+        return orderDishes;
     }
 
 }
