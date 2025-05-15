@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../services/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { getDishesByRestaurantId, createDish, updateDish, deleteDish } from '../services/api';
+import { getDishesByRestaurantId, createDish, updateDish, deleteDish, getRestaurantOrderHistory, getOrderDishesByOrderID } from '../services/api';
 import './styles.css';
 
 function SellerDashboard() {
@@ -16,6 +16,12 @@ function SellerDashboard() {
   const [editingDish, setEditingDish] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showOrderHistory, setShowOrderHistory] = useState(false);
+  const [orderHistory, setOrderHistory] = useState([]);
+  const [orderHistoryLoading, setOrderHistoryLoading] = useState(false);
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [orderDishes, setOrderDishes] = useState([]);
+  const [loadingOrderDishes, setLoadingOrderDishes] = useState(false);
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   
@@ -195,6 +201,61 @@ function SellerDashboard() {
     }
   };
 
+  // Helper function to format timestamps in a user-friendly way
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-US', {
+      weekday: 'short',
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+  
+  const fetchOrderHistory = async () => {
+    if (!restaurantId) return;
+    
+    setOrderHistoryLoading(true);
+    try {
+      const response = await getRestaurantOrderHistory(restaurantId);
+      setOrderHistory(response.data);
+      setShowOrderHistory(true);
+    } catch (error) {
+      console.error('Failed to fetch order history:', error);
+    } finally {
+      setOrderHistoryLoading(false);
+    }
+  };
+  
+  const toggleOrderDetails = async (orderId) => {
+    console.log(`Toggling order details for order ID: ${orderId}`);
+    
+    if (expandedOrderId === orderId) {
+      // If already expanded, collapse it
+      console.log('Collapsing order details');
+      setExpandedOrderId(null);
+      setOrderDishes([]);
+      return;
+    }
+    
+    console.log('Expanding order details');
+    setExpandedOrderId(orderId);
+    setLoadingOrderDishes(true);
+    
+    try {
+      console.log(`Fetching dishes for order ID: ${orderId}`);
+      const response = await getOrderDishesByOrderID(orderId);
+      console.log('Order dishes response:', response);
+      setOrderDishes(response.data);
+    } catch (error) {
+      console.error('Failed to fetch order dishes:', error);
+      setOrderDishes([]);
+    } finally {
+      setLoadingOrderDishes(false);
+    }
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -204,8 +265,91 @@ function SellerDashboard() {
     <div className="dashboard-container">
       <header className="dashboard-header">
         <h1>Restaurant Dashboard: {currentUser?.name || 'Seller'}</h1>
-        <button onClick={handleLogout} className="logout-button">Logout</button>
+        <div className="header-buttons">
+          <button onClick={fetchOrderHistory} className="order-history-button">Order History</button>
+          <button onClick={handleLogout} className="logout-button">Logout</button>
+        </div>
       </header>
+      
+      {/* Order History Modal */}
+      {showOrderHistory && (
+        <div className="modal-overlay">
+          <div className="order-history-modal">
+            <div className="modal-header">
+              <h2>Restaurant Order History</h2>
+              <button onClick={() => setShowOrderHistory(false)} className="close-modal">×</button>
+            </div>
+            <div className="modal-content">
+              {orderHistoryLoading ? (
+                <p>Loading order history...</p>
+              ) : orderHistory.length > 0 ? (
+                <div className="order-history-list">
+                  {orderHistory.map(order => (
+                    <div key={order.id} className="order-card">
+                      <div 
+                        className="order-header" 
+                        onClick={() => toggleOrderDetails(order.id)}
+                      >
+                        <div className="order-info">
+                          <h3>Order #{order.id}</h3>
+                          <div className="order-meta">
+                            <span className={`status-badge ${order.status.toLowerCase()}`}>
+                              {order.status}
+                            </span>
+                            <span className="total-price">${parseFloat(order.totalPrice).toFixed(2)}</span>
+                          </div>
+                        </div>
+                        <div className="order-details">
+                          <p><strong>User ID:</strong> #{order.userID}</p>
+                          <p><strong>Destination:</strong> {order.destination}</p>
+                          <p><strong>Shipping:</strong> {order.shippingCompany}</p>
+                          <span className="expand-icon">
+                            {expandedOrderId === order.id ? '▼' : '►'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {expandedOrderId === order.id && (
+                        <div className="order-dishes">
+                          <h4>Ordered Items {loadingOrderDishes ? '(Loading...)' : ''}</h4>
+                          {loadingOrderDishes ? (
+                            <p>Loading order items...</p>
+                          ) : orderDishes && orderDishes.length > 0 ? (
+                            <table className="dishes-table">
+                              <thead>
+                                <tr>
+                                  <th>Dish Name</th>
+                                  <th>Quantity</th>
+                                  <th>Price</th>
+                                  <th>Total</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {orderDishes.map(dish => (
+                                  <tr key={dish.id}>
+                                    <td>{dish.dishName || 'N/A'}</td>
+                                    <td>{dish.quantity}</td>
+                                    <td>${parseFloat(dish.unitPrice).toFixed(2)}</td>
+                                    <td>${(parseFloat(dish.unitPrice) * dish.quantity).toFixed(2)}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          ) : (
+                            <p>No items found for this order.</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>No order history found for this restaurant.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="dashboard-content">
         <div className="dishes-management">
