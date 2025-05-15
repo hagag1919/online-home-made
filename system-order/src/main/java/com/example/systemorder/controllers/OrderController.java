@@ -41,8 +41,9 @@ public class OrderController {
                 orderRequest.getDishIDs(),
                 orderRequest.getDestination(),
                 orderRequest.getShippingCompany()
+                , orderRequest.getTotalPrice()
         );
-        return Response.status(Response.Status.CREATED).build();
+        return Response.accepted().entity("Order received, being processed.").build();
     }
 
     @GET

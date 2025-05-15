@@ -1,97 +1,120 @@
 {
-  "info": {
-    "name": "System Order API",
-    "_postman_id": "b3b3f6f3-2f3a-4415-91bb-50fbb9ac3d2c",
-    "description": "Test endpoints for placing and retrieving orders.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "Place Order",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"userID\": 1,\n  \"restaurantID\": 2,\n  \"dishIDs\": [101, 102],\n  \"destination\": \"123 Main Street\",\n  \"shippingCompany\": \"FastExpress\"\n}"
-        },
-        "url": {
-          "raw": "http://localhost:8080/system-order-1.0-SNAPSHOT/api/order/placeOrder",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "system-order-1.0-SNAPSHOT",
-            "api",
-            "order",
-            "placeOrder"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Get Orders by User ID",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:8080/system-order-1.0-SNAPSHOT/api/order/getAllOrdersByUserID?userID=1",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "system-order-1.0-SNAPSHOT",
-            "api",
-            "order",
-            "getAllOrdersByUserID"
-          ],
-          "query": [
-            {
-              "key": "userID",
-              "value": "1"
-            }
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Get Orders by Restaurant ID",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:8080/system-order-1.0-SNAPSHOT/api/order/getAllOrdersByRestaurantID?restaurantID=2",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "system-order-1.0-SNAPSHOT",
-            "api",
-            "order",
-            "getAllOrdersByRestaurantID"
-          ],
-          "query": [
-            {
-              "key": "restaurantID",
-              "value": "2"
-            }
-          ]
-        }
-      },
-      "response": []
-    }
-  ]
+	"info": {
+		"_postman_id": "98303a3c-532a-40fa-8967-8d6f1277389b",
+		"name": "System Order API",
+		"description": "Test endpoints for placing and retrieving orders.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31977867"
+	},
+	"item": [
+		{
+			"name": "Place Order",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"userID\": 1,\n  \"restaurantID\": 2,\n  \"destination\": \"123 Main St, Cityville\",\n  \"shippingCompany\": \"FastShip Co.\",\n  \"dishIDs\": [\n    {\n      \"dishID\": 1,\n      \"quantity\": 2\n    },\n    {\n      \"dishID\": 2,\n      \"quantity\": 1\n    }\n  ],\n  \"totalPrice\": 80.9\n}\n"
+				},
+				"url": {
+					"raw": "http://localhost:8080/system-order-1.0-SNAPSHOT/api/order/placeOrder",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"system-order-1.0-SNAPSHOT",
+						"api",
+						"order",
+						"placeOrder"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Orders by User ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/system-order-1.0-SNAPSHOT/api/order/getAllOrdersByUserID?userID=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"system-order-1.0-SNAPSHOT",
+						"api",
+						"order",
+						"getAllOrdersByUserID"
+					],
+					"query": [
+						{
+							"key": "userID",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Orders by Restaurant ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/system-order-1.0-SNAPSHOT/api/order/getAllOrdersByRestaurantID?restaurantID=101",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"system-order-1.0-SNAPSHOT",
+						"api",
+						"order",
+						"getAllOrdersByRestaurantID"
+					],
+					"query": [
+						{
+							"key": "restaurantID",
+							"value": "101"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All orders",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/system-order-1.0-SNAPSHOT/api/order/getAllOrders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"system-order-1.0-SNAPSHOT",
+						"api",
+						"order",
+						"getAllOrders"
+					]
+				}
+			},
+			"response": []
+		}
+	]
 }

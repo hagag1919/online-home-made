@@ -2,7 +2,6 @@ package com.example.systemorder.utilities;
 
 import java.util.List;
 
-import com.example.systemorder.models.Dish;
 import com.example.systemorder.models.RequestDishs;
 
 public class OrderRequest {
@@ -11,6 +10,7 @@ public class OrderRequest {
     private List<RequestDishs> dishIDs;
     private String destination;
     private String shippingCompany;
+    private Double totalPrice;
 
     // Getters and Setters
     public Long getUserID() {
@@ -44,6 +44,12 @@ public class OrderRequest {
     public void setShippingCompany(String shippingCompany) {
         this.shippingCompany = shippingCompany;
     }
+    public Double getTotalPrice() {
+        return totalPrice;
+    }
+    public void setTotalPrice(Double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
     @Override
     public String toString() {
         return "OrderRequest{" +
@@ -52,6 +58,7 @@ public class OrderRequest {
                 ", dishIDs=" + dishIDs +
                 ", destination='" + destination + '\'' +
                 ", shippingCompany='" + shippingCompany + '\'' +
+                ", totalPrice=" + totalPrice +
                 '}';
     }
 

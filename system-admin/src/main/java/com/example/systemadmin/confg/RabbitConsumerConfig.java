@@ -1,14 +1,8 @@
 package com.example.systemadmin.confg;
 
-import com.example.systemadmin.models.PaymentFailure;
-import com.example.systemadmin.models.ServiceLog;
-import com.example.systemadmin.repos.IPaymentFailureRepo;
-import com.example.systemadmin.repos.IServiceLogRepo;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.context.annotation.*;
 
 @Configuration

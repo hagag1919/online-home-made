@@ -38,6 +38,14 @@ public class RabbitMQSetup {
             ch.queueBind("log_queue", "log_exchange", "#.Error");   // Match all services with severity "Error"
             ch.queueBind("log_queue", "log_exchange", "#.Warning"); // Match all services with severity "Warning"
             ch.queueBind("log_queue", "log_exchange", "#.Info");    // Match all services with severity "Info"
+
+            // Stock exchange
+            ch.exchangeDeclare("stock_exchange", "topic", true);
+            ch.queueDeclare("request_stock", true, false, false, null);
+            ch.queueDeclare("response_stock", true, false, false, null);
+            ch.queueBind("request_stock", "stock_exchange", "request_stock");
+            ch.queueBind("response_stock", "stock_exchange", "response_stock");
+
         }
     }
 }
