@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.example.systemorder.message.SendOrderConfirm;
 import com.example.systemorder.models.Order;
+import com.example.systemorder.models.OrderDish;
 import com.example.systemorder.models.RequestDishs;
 import com.example.systemorder.repo.SystemOrderRepoLocal;
 import com.example.systemorder.utilities.Calc;
@@ -40,11 +41,14 @@ public class OrderService implements IOrderService {
 
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void placeOrder(Long userID, Long restaurantID, List<RequestDishs> requestDishes,
+    public void placeOrder(Long userID, Long restaurantID, List<OrderDish> orderDishs,
                            String destination, String shippingCompany, Double totalPrice) {
         try {
             // Prepare stock request
-            Map<Long, Integer> qtyMap = mapDishQuantities(requestDishes);
+            List<RequestDishs> dishsAndAmounts = orderDishs.stream()
+                    .map(dish -> new RequestDishs(dish.getDishId(), dish.getQuantity()))
+                    .collect(Collectors.toList());
+            Map<Long, Integer> qtyMap = mapDishQuantities(dishsAndAmounts);
             List<Map<String, Object>> dishes = prepareDishDetails(qtyMap);
 
             // Check stock availability
@@ -57,8 +61,7 @@ public class OrderService implements IOrderService {
             validateTotalPrice(userID, totalPrice);
 
             // Create and save the order
-            Order order = createOrder(userID, restaurantID, qtyMap, totalPrice, destination, shippingCompany);
-           // systemOrderRepo.placeOrder(order);
+            Order order = createOrder(userID, restaurantID,  orderDishs, totalPrice, destination, shippingCompany);
 
             // Process payment
             boolean paymentSuccessful = processPayment(userID, totalPrice,dishes);
@@ -161,10 +164,21 @@ public class OrderService implements IOrderService {
         }
     }
 
-    private Order createOrder(Long userID, Long restaurantID, Map<Long, Integer> qtyMap,
+    private Order createOrder(Long userID, Long restaurantID, List<OrderDish> orderDishes,
                               Double totalPrice, String destination, String shippingCompany) {
-        List<Long> dishIds = new ArrayList<>(qtyMap.keySet());
-        return new Order(userID, restaurantID, dishIds, BigDecimal.valueOf(totalPrice), destination, shippingCompany);
+        Order order = new Order(
+                userID,
+                restaurantID,
+                orderDishes,
+                BigDecimal.valueOf(totalPrice),
+                destination,
+                shippingCompany
+        );
+        order.setStatus("Pending");
+        
+        return order;
+        
+        
     }
 
     private boolean processPayment(Long userID, double totalPrice, List<Map<String, Object>> dishes) {

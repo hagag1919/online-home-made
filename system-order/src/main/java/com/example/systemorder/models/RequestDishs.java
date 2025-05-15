@@ -3,7 +3,10 @@ package com.example.systemorder.models;
 public class RequestDishs {
     private long dishID;
     private int quantity;
-    public RequestDishs(long dishID, int quantity) {}
+    public RequestDishs(long dishID, int quantity) {
+        this.dishID = dishID;
+        this.quantity = quantity;
+    }
     public  RequestDishs() {}
     public long getDishID() {
         return dishID;

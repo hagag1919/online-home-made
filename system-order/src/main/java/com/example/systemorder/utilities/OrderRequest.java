@@ -2,12 +2,12 @@ package com.example.systemorder.utilities;
 
 import java.util.List;
 
-import com.example.systemorder.models.RequestDishs;
+import com.example.systemorder.models.OrderDish;
 
 public class OrderRequest {
     private Long userID;
     private Long restaurantID;
-    private List<RequestDishs> dishIDs;
+    private List<OrderDish> orderDishes;
     private String destination;
     private String shippingCompany;
     private Double totalPrice;
@@ -26,11 +26,11 @@ public class OrderRequest {
     public void setRestaurantID(Long restaurantID) {
         this.restaurantID = restaurantID;
     }
-    public List<RequestDishs> getDishIDs() {
-        return dishIDs;
+    public List<OrderDish> getOrderDishes() {
+        return orderDishes;
     }
-    public void setDishIDs(List<RequestDishs> dishIDs) {
-        this.dishIDs = dishIDs;
+    public void setOrderDishes(List<OrderDish> orderDishes) {
+        this.orderDishes = orderDishes;
     }
     public String getDestination() {
         return destination;
@@ -55,7 +55,7 @@ public class OrderRequest {
         return "OrderRequest{" +
                 "userID=" + userID +
                 ", restaurantID=" + restaurantID +
-                ", dishIDs=" + dishIDs +
+                ", orderDishes=" + orderDishes +
                 ", destination='" + destination + '\'' +
                 ", shippingCompany='" + shippingCompany + '\'' +
                 ", totalPrice=" + totalPrice +

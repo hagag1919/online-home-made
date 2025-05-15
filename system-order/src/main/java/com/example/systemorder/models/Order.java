@@ -4,8 +4,13 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -22,10 +27,8 @@ public class Order {
     @Column(nullable = false)
     private Long restaurantID;
 
-    @ElementCollection
-    @CollectionTable(name = "order_dishes_link", joinColumns = @JoinColumn(name = "order_id"))
-    @Column(name = "dish_id")
-    private List<Long> dishes;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderDish> orderDishes = new ArrayList<>();
 
     @Column(nullable = false)
     private BigDecimal totalPrice;
@@ -43,11 +46,11 @@ public class Order {
     public Order() {
     }
 
-    public Order(Long userID, Long restaurantID, List<Long> dishes,
-                 BigDecimal totalPrice, String destination, String shippingCompany) {
+    public Order(Long userID, Long restaurantID, List<OrderDish> orderDishes,
+            BigDecimal totalPrice, String destination, String shippingCompany) {
         this.userID = userID;
         this.restaurantID = restaurantID;
-        this.dishes = dishes != null ? dishes : new ArrayList<>();
+        this.orderDishes = orderDishes != null ? orderDishes : new ArrayList<>();
         this.totalPrice = totalPrice;
         this.destination = destination;
         this.shippingCompany = shippingCompany;
@@ -79,12 +82,12 @@ public class Order {
         this.restaurantID = restaurantID;
     }
 
-    public List<Long> getDishes() {
-        return dishes;
+    public List<OrderDish> getOrderDishes() {
+        return orderDishes;
     }
 
-    public void setDishes(List<Long> dishes) {
-        this.dishes = dishes;
+    public void setOrderDishes(List<OrderDish> orderDishes) {
+        this.orderDishes = orderDishes;
     }
 
     public BigDecimal getTotalPrice() {

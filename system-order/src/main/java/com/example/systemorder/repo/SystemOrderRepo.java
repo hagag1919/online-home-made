@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.example.systemorder.models.Order;
+import com.example.systemorder.models.OrderDish;
 
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
@@ -22,18 +23,19 @@ public class SystemOrderRepo implements SystemOrderRepoLocal {
     @EJB
     private DBConnection dbConnection;
 
- @Override
+@Override
 public void placeOrder(Order order) {
 
-    String orderSql = "INSERT INTO Orders (user_id, restaurant_id, total_price, destination, shipping_company, status, dishes) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    String orderDishesLinkSql = "INSERT INTO order_dishes_link (order_id, dish_id) VALUES (?, ?)";
+    String orderSql = "INSERT INTO orders (user_id, restaurant_id, total_price, destination, shipping_company, status) VALUES (?, ?, ?, ?, ?, ?)";
+    String orderDishesSql = "INSERT INTO order_dishes (order_id, dish_id, dish_name, quantity, unit_price) VALUES (?, ?, ?, ?, ?)";
+
     Connection conn = null;
 
     try {
         conn = dbConnection.getConnection();
         conn.setAutoCommit(false);
 
-        
+        // Insert into orders table
         try (PreparedStatement orderStmt = conn.prepareStatement(orderSql, Statement.RETURN_GENERATED_KEYS)) {
             orderStmt.setLong(1, order.getUserID());
             orderStmt.setLong(2, order.getRestaurantID());
@@ -41,7 +43,6 @@ public void placeOrder(Order order) {
             orderStmt.setString(4, order.getDestination());
             orderStmt.setString(5, order.getShippingCompany());
             orderStmt.setString(6, order.getStatus());
-            orderStmt.setString(7, order.getDishes().toString());
             orderStmt.executeUpdate();
 
             try (ResultSet generatedKeys = orderStmt.getGeneratedKeys()) {
@@ -53,16 +54,18 @@ public void placeOrder(Order order) {
             }
         }
 
-        // Insert into order_dishes_link table
-        if (order.getDishes() != null && !order.getDishes().isEmpty()) {
-            try (PreparedStatement linkStmt = conn.prepareStatement(orderDishesLinkSql)) {
-                for (Long dishId : order.getDishes()) {
-                    linkStmt.setLong(1, order.getId());
-                    linkStmt.setLong(2, dishId);
-                    linkStmt.addBatch();
+        // Insert into order_dishes table
+        if (order.getOrderDishes() != null && !order.getOrderDishes().isEmpty()) {
+            try (PreparedStatement dishesStmt = conn.prepareStatement(orderDishesSql)) {
+                for (OrderDish dish : order.getOrderDishes()) {
+                    dishesStmt.setLong(1, order.getId());
+                    dishesStmt.setLong(2, dish.getDishId());
+                    dishesStmt.setString(3, dish.getDishName());
+                    dishesStmt.setInt(4, dish.getQuantity());
+                    dishesStmt.setBigDecimal(5, dish.getUnitPrice());
+                    dishesStmt.addBatch();
                 }
-                linkStmt.executeBatch();
-
+                dishesStmt.executeBatch();
             }
         }
 

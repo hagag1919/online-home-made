@@ -38,10 +38,10 @@ public class OrderController {
         orderService.placeOrder(
                 orderRequest.getUserID(),
                 orderRequest.getRestaurantID(),
-                orderRequest.getDishIDs(),
+                orderRequest.getOrderDishes(),
                 orderRequest.getDestination(),
-                orderRequest.getShippingCompany()
-                , orderRequest.getTotalPrice()
+                orderRequest.getShippingCompany(),
+                orderRequest.getTotalPrice()
         );
         return Response.accepted().entity("Order received, being processed.").build();
     }
@@ -51,6 +51,18 @@ public class OrderController {
     public Response getAllOrders() {
         List<Order> orders = orderService.getAllOrders();
         return Response.ok(orders).build();
+    }
+
+    @GET
+    @Path("/getOrderDishesByOrderID")
+    public Response getOrderDishesByOrderID(@QueryParam("orderID") Long orderID) {
+        List<Order> orders = orderService.getAllOrders();
+        for (Order order : orders) {
+            if (order.getId().equals(orderID)) {
+                return Response.ok(order.getOrderDishes()).build();
+            }
+        }
+        return Response.status(Response.Status.NOT_FOUND).entity("Order not found").build();
     }
 
 }

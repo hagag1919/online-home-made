@@ -48,10 +48,12 @@ public class SendOrderConfirm {
                 MessageProperties.PERSISTENT_TEXT_PLAIN, json.getBytes());
 
             // customer queue
-            String userQ = "order_status_user_" + userId;
-            ch.queueDeclare(userQ,true,false,false,null);
-            ch.basicPublish("", userQ,
-                MessageProperties.PERSISTENT_TEXT_PLAIN, json.getBytes());
+            if(type.equals("order_exchange")) {
+                String userQ = "order_status_user";
+                ch.queueDeclare(userQ,true,false,false,null);
+                ch.basicPublish("", userQ,
+                        MessageProperties.PERSISTENT_TEXT_PLAIN, json.getBytes());
+            }
 
             ch.waitForConfirmsOrDie(5_000);
         } catch (Exception e) {
