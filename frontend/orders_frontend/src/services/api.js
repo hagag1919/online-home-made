@@ -87,6 +87,16 @@ export const getUserOrderHistory = (userId) => {
   return orderAPI.get(`/getAllOrdersByUserID?userID=${userId}`);
 };
 
+// Update user balance
+export const updateUserBalance = (userId, balance) => {
+  return userAPI.put(`/accounts/updateUserBalance?id=${userId}&balance=${balance}`);
+};
+
+// Get user balance
+export const getUserBalance = (userId) => {
+  return userAPI.get(`/accounts/getUserBalance?id=${userId}`);
+};
+
 // Get order dishes by order ID
 export const getOrderDishesByOrderID = (orderId) => {
   const config = {

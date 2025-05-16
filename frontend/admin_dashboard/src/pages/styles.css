@@ -175,3 +175,34 @@
   background-color: #f8d7da;
   color: #842029;
 }
+
+/* Payment Failures */
+.payment-id-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.payment-id-cell svg {
+  color: #0d6efd;
+}
+
+.amount-cell {
+  font-weight: 600;
+  color: #dc3545;
+}
+
+.reason-cell {
+  color: #842029;
+  font-weight: 500;
+}
+
+.severity-error {
+  background-color: rgba(220, 53, 69, 0.05);
+}
+
+.severity-error:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+}

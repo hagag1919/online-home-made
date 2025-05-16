@@ -22,6 +22,25 @@ export function AuthProvider({ children }) {
     }
     
     setLoading(false);
+    
+    // Add event listener to handle balance updates or other user data changes
+    const handleStorageChange = () => {
+      const updatedUser = localStorage.getItem('user');
+      if (updatedUser) {
+        try {
+          const parsedUser = JSON.parse(updatedUser);
+          setCurrentUser(parsedUser);
+        } catch (error) {
+          console.error('Failed to parse updated user data:', error);
+        }
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const login = (user, type) => {

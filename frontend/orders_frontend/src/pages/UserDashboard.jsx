@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { createOrder, getAllRestaurants, getDishesByRestaurantId, getUserOrderHistory, getOrderDishesByOrderID, getOrderStatusUpdates } from '../services/api';
+import { createOrder, getAllRestaurants, getDishesByRestaurantId, getUserOrderHistory, getOrderDishesByOrderID, getOrderStatusUpdates, updateUserBalance, getUserBalance } from '../services/api';
 import { useAuth } from '../services/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './styles.css';
@@ -11,6 +11,7 @@ function UserDashboard() {
   const [selectedDishes, setSelectedDishes] = useState([]);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderError, setOrderError] = useState(false);
+  const [insufficientFundsError, setInsufficientFundsError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showOrderHistory, setShowOrderHistory] = useState(false);
   const [orderHistory, setOrderHistory] = useState([]);
@@ -22,6 +23,13 @@ function UserDashboard() {
   const [notifications, setNotifications] = useState([]);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  // Balance-related states
+  const [showBalanceModal, setShowBalanceModal] = useState(false);
+  const [newBalance, setNewBalance] = useState('');
+  const [balanceUpdateLoading, setBalanceUpdateLoading] = useState(false);
+  const [balanceUpdateSuccess, setBalanceUpdateSuccess] = useState(false);
+  const [balanceUpdateError, setBalanceUpdateError] = useState(false);
+
   // Track which notifications have been read
   const [readNotifications, setReadNotifications] = useState(() => {
     // Try to get read notification ids from localStorage
@@ -38,6 +46,37 @@ function UserDashboard() {
   });
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  
+  // Fetch user balance from API
+  useEffect(() => {
+    const fetchUserBalance = async () => {
+      if (currentUser?.id) {
+        try {
+          const response = await getUserBalance(currentUser.id);
+          if (response.status === 200 && response.data !== undefined) {
+            console.log('User balance fetched:', response.data);
+            
+            // Only update if the balance is different to avoid unnecessary re-renders
+            if (currentUser.balance !== response.data) {
+              // Update the currentUser object with the new balance from API
+              const updatedUser = { ...currentUser, balance: response.data };
+              
+              // Update localStorage with the new user data
+              localStorage.setItem('user', JSON.stringify(updatedUser));
+              
+              // Trigger a storage event to update the AuthContext
+              window.dispatchEvent(new Event('storage'));
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch user balance:', error);
+        }
+      }
+    };
+    
+    // Fetch balance immediately when component mounts
+    fetchUserBalance();
+  }, [currentUser?.id]); // Only re-run if the user ID changes
 
   // Fetch real restaurants data from API
   useEffect(() => {
@@ -112,6 +151,10 @@ function UserDashboard() {
         0
       );
       
+      // Check if user has sufficient balance
+      const userBalance = currentUser?.balance || 0;
+      const hasSufficientFunds = userBalance >= totalPrice;
+      
       const orderData = {
         userID: currentUser?.id || 1, // Use currentUser.id if available, fallback to 1
         restaurantID: selectedRestaurant.id,
@@ -131,6 +174,14 @@ function UserDashboard() {
       if (response.status === 202) {
         setOrderSuccess(true);
         setSelectedDishes([]);
+        
+        // Show insufficient funds warning if applicable
+        if (!hasSufficientFunds) {
+          setInsufficientFundsError(true);
+          setTimeout(() => {
+            setInsufficientFundsError(false);
+          }, 5000);
+        }
         
         // Reset success message after 3 seconds
         setTimeout(() => {
@@ -155,6 +206,53 @@ function UserDashboard() {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+  
+  // Function to update user balance
+  const handleUpdateBalance = async (e) => {
+    e.preventDefault();
+    
+    if (!currentUser?.id || !newBalance) return;
+    
+    setBalanceUpdateLoading(true);
+    setBalanceUpdateSuccess(false);
+    setBalanceUpdateError(false);
+    
+    try {
+      const response = await updateUserBalance(currentUser.id, newBalance);
+      
+      if (response.status === 200) {
+        // Update the currentUser object with new balance
+        const updatedUser = { ...currentUser, balance: parseFloat(newBalance) };
+        
+        // Update local storage and context
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // Use a callback to ensure the currentUser state is updated
+        // Note: We need to modify AuthContext to support this, but for now
+        // we'll just directly update the user in localStorage
+        
+        // Update the current user in component state (will refresh on page reload)
+        // setCurrentUser(updatedUser);
+
+        // Reload the page 
+        
+        setBalanceUpdateSuccess(true);
+        setNewBalance(''); // Clear the input
+        
+        // Close modal after a delay
+        setTimeout(() => {
+          setShowBalanceModal(false);
+          setBalanceUpdateSuccess(false);
+          window.location.reload();
+        }, 1200);
+      }
+    } catch (err) {
+      console.error('Failed to update balance:', err);
+      setBalanceUpdateError(true);
+    } finally {
+      setBalanceUpdateLoading(false);
+    }
   };
   
   // Helper function to format timestamps in a user-friendly way
@@ -384,10 +482,57 @@ function UserDashboard() {
     };
   }, [showNotifications, currentUser, fetchNotifications]);
 
+  const handleBalanceUpdate = async (e) => {
+    e.preventDefault();
+    
+    if (!currentUser?.id || !newBalance) return;
+    
+    setBalanceUpdateLoading(true);
+    setBalanceUpdateError(false);
+    setBalanceUpdateSuccess(false);
+    
+    try {
+      const response = await updateUserBalance(currentUser.id, parseFloat(newBalance));
+      
+      if (response.status === 200) {
+        setBalanceUpdateSuccess(true);
+        
+        // Update local user object with new balance
+        const updatedUser = { ...currentUser, balance: parseFloat(response.data.balance || newBalance) };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // Force update the auth context
+        window.dispatchEvent(new Event('storage'));
+        
+        // Reset form
+        setNewBalance('');
+        
+        // Close modal after 2 seconds
+        setTimeout(() => {
+          setShowBalanceModal(false);
+        }, 2000);
+      } else {
+        setBalanceUpdateError(true);
+      }
+    } catch (error) {
+      console.error('Failed to update balance:', error);
+      setBalanceUpdateError(true);
+    } finally {
+      setBalanceUpdateLoading(false);
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
-        <h1>Welcome, {currentUser?.username || 'User'}</h1>
+        <div className="user-info-container">
+          <h1>Welcome, {currentUser?.username || 'User'}</h1>
+          <div className="user-balance" onClick={() => setShowBalanceModal(true)}>
+            <span className="balance-label">Balance:</span>
+            <span className="balance-amount">${currentUser?.balance?.toFixed(2) || '0.00'}</span>
+            <button className="add-balance-button" title="Add funds to your account">+</button>
+          </div>
+        </div>
         <div className="header-buttons">
           <button 
             onClick={() => {
@@ -486,6 +631,60 @@ function UserDashboard() {
               ) : (
                 <p>No order history found.</p>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Balance Update Modal */}
+      {showBalanceModal && (
+        <div className="modal-overlay">
+          <div className="balance-modal">
+            <div className="modal-header">
+              <h2>Update Your Balance</h2>
+              <button onClick={() => setShowBalanceModal(false)} className="close-modal">×</button>
+            </div>
+            <div className="modal-content">
+              <form onSubmit={handleUpdateBalance}>
+                <div className="form-group">
+                  <label htmlFor="balance-input">Enter New Balance:</label>
+                  <div className="balance-input-container">
+                    <span className="currency-symbol">$</span>
+                    <input
+                      id="balance-input"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={newBalance}
+                      onChange={(e) => setNewBalance(e.target.value)}
+                      placeholder="0.00"
+                      className="form-control balance-input"
+                      required
+                      disabled={balanceUpdateLoading}
+                    />
+                  </div>
+                </div>
+                
+                <button 
+                  type="submit" 
+                  className="submit-button" 
+                  disabled={balanceUpdateLoading}
+                >
+                  {balanceUpdateLoading ? 'Updating...' : 'Update Balance'}
+                </button>
+                
+                {balanceUpdateSuccess && (
+                  <div className="success-message">
+                    Balance updated successfully!
+                  </div>
+                )}
+                
+                {balanceUpdateError && (
+                  <div className="error-message">
+                    Failed to update balance. Please try again.
+                  </div>
+                )}
+              </form>
             </div>
           </div>
         </div>
@@ -675,13 +874,35 @@ function UserDashboard() {
                 ${selectedDishes.reduce((sum, dish) => sum + dish.price * dish.quantity, 0).toFixed(2)}
               </span>
             </div>
-            <button onClick={handleCreateOrder} className="create-order-button">
-              Place Order
-            </button>
+            
+            {/* Show balance warning */}
+            {currentUser?.balance < selectedDishes.reduce((sum, dish) => sum + dish.price * dish.quantity, 0) && (
+              <div className="balance-warning">
+                <span className="warning-icon">⚠️</span>
+                <span>Your balance is insufficient for this order. You can still place the order, but please add funds soon.</span>
+              </div>
+            )}
+            
+            <div className="checkout-row">
+              <button onClick={handleCreateOrder} className="create-order-button">
+                Place Order
+              </button>
+              
+              <button onClick={() => setShowBalanceModal(true)} className="add-funds-button">
+                Add Funds
+              </button>
+            </div>
             
             {orderSuccess && (
               <div className="success-message">
                 Your order has been placed successfully! Your food is being prepared.
+              </div>
+            )}
+            
+            {insufficientFundsError && (
+              <div className="warning-message">
+                <span className="warning-icon">⚠️</span>
+                Order placed, but your balance is insufficient. Please add funds to your account.
               </div>
             )}
             
