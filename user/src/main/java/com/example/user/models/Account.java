@@ -33,6 +33,8 @@ import com.fasterxml.jackson.databind.util.Named;
     @NamedQuery(name = "Account.findAll", query = "SELECT a FROM Account a"),
     @NamedQuery(name = "Account.findByUsername", query = "SELECT a FROM Account a WHERE a.username = :username"),
     @NamedQuery(name = "Account.findById", query = "SELECT a FROM Account a WHERE a.id = :id"),
+        @NamedQuery(name = "Account.getUserBalance",query = "SELECT a.balance FROM Account a WHERE a.id = :id"),
+        @NamedQuery(name = "Account.updateUserBalance",query = "UPDATE Account a SET a.balance = :balance WHERE a.id = :id"),
 })
 public class Account {
     
@@ -46,13 +48,16 @@ public class Account {
     @Column(name = "password",nullable = false)
     private String password;
 
+
+    private Double balance;
+
     
     // Default constructor required by JPA
     public Account() {
     }
     
     // Constructor with fields
-    public Account(String username, String password) {
+    public Account(String username, String password, Double balance) {
         this.username = username;
         this.password = password;
     }
@@ -81,5 +86,12 @@ public class Account {
     public void setPassword(String password) {
         this.password = password;
     }
-    
+
+    public Double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
+    }
 }

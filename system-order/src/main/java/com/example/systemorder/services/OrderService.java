@@ -35,7 +35,9 @@ public class OrderService implements IOrderService {
     @EJB
     private SendOrderConfirm confirmPublisher;
 
-    private static final double MIN_CHARGE = 10.0;
+    private  final AccountService accountService = new AccountService();
+
+    private static final double MIN_CHARGE = 30.0;
 
     private final Calc calc = new Calc();
 
@@ -44,7 +46,6 @@ public class OrderService implements IOrderService {
     public void placeOrder(Long userID, Long restaurantID, List<OrderDish> orderDishs,
                            String destination, String shippingCompany, Double totalPrice) {
         try {
-            System.out.println("Here 1");
             // Prepare stock request
             List<RequestDishs> dishsAndAmounts = orderDishs.stream()
                     .map(dish -> new RequestDishs(dish.getDishId(), dish.getQuantity()))
@@ -52,31 +53,24 @@ public class OrderService implements IOrderService {
             Map<Long, Integer> qtyMap = mapDishQuantities(dishsAndAmounts);
             List<Map<String, Object>> dishes = prepareDishDetails(qtyMap);
 
-            System.out.println("Here 2");
             // Check stock availability
             boolean stockAvailable = checkStockAvailability(userID, dishes);
             if (!stockAvailable) {
                 handleStockUnavailable(userID);
             }
-            System.out.println("Here 3");
-
 
             // Validate total price
             validateTotalPrice(userID, totalPrice);
-            System.out.println("Here 4");
             // Create and save the order
             Order order = createOrder(userID, restaurantID,  orderDishs, totalPrice, destination, shippingCompany);
-            System.out.println("Here 5");
             // Process payment
             boolean paymentSuccessful = processPayment(userID, totalPrice,dishes);
             if (!paymentSuccessful) {
                 handlePaymentFailure(userID);
             }
-            System.out.println("Here 6");
 
             // Mark order as completed
-            completeOrder(order, userID,dishes);
-            System.out.println("Here 7");
+            completeOrder(order, userID,dishes,totalPrice);
 
         } catch (Exception ex) {
             throw new RuntimeException("Order processing failed", ex);
@@ -157,14 +151,14 @@ public class OrderService implements IOrderService {
     }
 
     private void handleStockUnavailable(Long userID) {
-        confirmPublisher.send("failure", "Order failed: insufficient stock at restaurant", userID,null);
+        confirmPublisher.send("failure", "Order failed: insufficient stock at restaurant", userID,null,null);
         confirmPublisher.log("OrderService", "Order failed: insufficient stock at restaurant for user=" + userID, "Error");
         throw new RuntimeException("Insufficient stock at restaurant");
     }
 
     private void validateTotalPrice(Long userID, Double totalPrice) {
         if (totalPrice < MIN_CHARGE) {
-            confirmPublisher.send("failure", "Order failed: must be at least " + MIN_CHARGE, userID,null);
+            confirmPublisher.send("failure", "Order failed: must be at least " + MIN_CHARGE, userID,null,null);
             confirmPublisher.log("OrderService", "Order below minimum charge: user=" + userID + " total=" + totalPrice, "Error");
             throw new RuntimeException("Below minimum charge");
         }
@@ -190,7 +184,11 @@ public class OrderService implements IOrderService {
     private boolean processPayment(Long userID, double totalPrice, List<Map<String, Object>> dishes) {
         String paymentId = UUID.randomUUID().toString();
         try {
-            boolean success = true; // Simulate payment processing
+            boolean success = false;
+            double userBalance = accountService.getUserBalance(userID);
+            if(userBalance >= totalPrice) {
+                success = true;
+            }
             if (success) {
                 confirmPublisher.send("payments_exchange", "payment_success", "Payment processed", userID, paymentId, totalPrice, "EGP",dishes);
                 confirmPublisher.log("OrderService", "Payment succeeded: user=" + userID + " paymentId=" + paymentId, "Info");
@@ -208,15 +206,15 @@ public class OrderService implements IOrderService {
     }
 
     private void handlePaymentFailure(Long userID) {
-        confirmPublisher.send("failure", "Order failed: payment error", userID,null);
+        confirmPublisher.send("failure", "Order failed: payment error", userID,null,null);
         confirmPublisher.log("OrderService", "Order failed: payment error for user=" + userID, "Error");
         throw new RuntimeException("PaymentFailed");
     }
 
-    private void completeOrder(Order order, Long userID,List<Map<String, Object>> dishes) {
+    private void completeOrder(Order order, Long userID,List<Map<String, Object>> dishes,Double amount) {
         order.setStatus("Completed");
         systemOrderRepo.placeOrder(order);
-        confirmPublisher.send("success", "Order placed successfully", userID,dishes);
+        confirmPublisher.send("success", "Order placed successfully", userID,dishes,amount);
         confirmPublisher.log("OrderService", "Order completed for user=" + userID + " orderId=" + order.getId(), "Info");
     }
 

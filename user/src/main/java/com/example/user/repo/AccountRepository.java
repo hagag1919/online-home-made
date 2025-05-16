@@ -2,7 +2,11 @@ package com.example.user.repo;
 
 import com.example.user.models.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,4 +36,11 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
      * @return true if an account with the username exists, false otherwise
      */
     boolean existsByUsername(String username);
+
+    Double getUserBalance(Long id);
+
+    @Modifying
+    @Transactional
+    @Query(name = "Account.updateUserBalance")
+    void updateUserBalance(@Param("id") Long id, @Param("balance") Double balance);
 }

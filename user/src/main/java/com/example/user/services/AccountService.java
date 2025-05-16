@@ -24,12 +24,12 @@ public class AccountService {
      * @param password the password of the new account
      * @return the created Account object
      */
-    public Account register(String username, String password) {
+    public Account register(String username, String password,Double balance) {
         if (accountRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("Username already exists");
         }
         
-        Account account = new Account(username, password);
+        Account account = new Account(username, password,balance);
         return accountRepository.save(account);
     }
     /**
@@ -72,5 +72,12 @@ public class AccountService {
 
     public Account getAccountById(Long id) {
         return accountRepository.findById(id).orElse(null);
+    }
+
+    public Double getUserBalance(Long id) {
+        return accountRepository.getUserBalance(id);
+    }
+    public void updateUserBalance(Long id, Double balance) {
+        accountRepository.updateUserBalance(id, balance);
     }
 }

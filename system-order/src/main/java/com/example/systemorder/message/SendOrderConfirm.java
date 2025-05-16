@@ -21,8 +21,8 @@ public class SendOrderConfirm {
         factory.setHost("localhost");
     }
 
-    public void send(String routingKey, String msg, Long userId,List<Map<String, Object>> dishes) {
-        send("order_exchange", routingKey, msg, userId, null, null, null, dishes);
+    public void send(String routingKey, String msg, Long userId,List<Map<String, Object>> dishes,Double amount) {
+        send("order_exchange", routingKey, msg, userId, null, amount, null, dishes);
     }
 
     public void send(String type, String routingKey, String msg, Long userId,

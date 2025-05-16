@@ -35,7 +35,7 @@ public class AccountControllers {
      */
     @PostMapping("/register")
     public ResponseEntity<Account> register(@RequestBody Account account) {
-        Account createdAccount = accountService.register(account.getUsername(), account.getPassword());
+        Account createdAccount = accountService.register(account.getUsername(), account.getPassword(),account.getBalance());
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(createdAccount.getId())
@@ -97,5 +97,20 @@ public class AccountControllers {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No order status found for this user");
         }
 
+    }
+
+    @GetMapping("/getUserBalance")
+    public ResponseEntity<?> getUserBalance(@RequestParam Long id) {
+        Double balance = accountService.getUserBalance(id);
+        if (balance != null) {
+            return ResponseEntity.ok(balance);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+    }
+    @PutMapping("/updateUserBalance")
+    public ResponseEntity<?> updateUserBalance(@RequestParam Long id, @RequestParam Double balance) {
+        accountService.updateUserBalance(id, balance);
+        return ResponseEntity.ok("User balance updated successfully");
     }
 }

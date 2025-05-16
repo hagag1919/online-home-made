@@ -1,14 +1,14 @@
 {
 	"info": {
-		"_postman_id": "250c3714-bbd9-4871-b694-c89dacd7e09a",
-		"name": "AccountController API",
-		"description": "Endpoints for registering, logging in, retrieving, and listing user accounts.",
+		"_postman_id": "2ff169ab-d16c-412d-9efb-f885481bf0b2",
+		"name": "UserService API",
+		"description": "Collection to test Account and Restaurant endpoints on http://localhost:8083",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "31977867"
 	},
 	"item": [
 		{
-			"name": "Register User",
+			"name": "Register Account",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -19,7 +19,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"ahmed\",\n    \"password\": \"mypassword\"\n}"
+					"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"testpass\"\n}"
 				},
 				"url": {
 					"raw": "http://localhost:8083/accounts/register",
@@ -37,7 +37,7 @@
 			"response": []
 		},
 		{
-			"name": "Login User",
+			"name": "Login Account",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -48,7 +48,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"ahmed\",\n    \"password\": \"mypassword\"\n}"
+					"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"testpass\"\n}"
 				},
 				"url": {
 					"raw": "http://localhost:8083/accounts/login",
@@ -66,7 +66,7 @@
 			"response": []
 		},
 		{
-			"name": "Get All Users",
+			"name": "Get All Accounts",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -86,7 +86,7 @@
 			"response": []
 		},
 		{
-			"name": "Get User By ID",
+			"name": "Get Account by ID",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -105,6 +105,134 @@
 						{
 							"key": "id",
 							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Order Status by User ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/accounts/getOrderStatus?userId=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"accounts",
+						"getOrderStatus"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Restaurants",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/restaurants/getall",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"restaurants",
+						"getall"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Dishes by Restaurant ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/restaurants/getbyrestaurantid?restaurantId=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"restaurants",
+						"getbyrestaurantid"
+					],
+					"query": [
+						{
+							"key": "restaurantId",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User Balance",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/accounts/getUserBalance?id=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"accounts",
+						"getUserBalance"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Balance",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/accounts/updateUserBalance?id=1&balance=500.8",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"accounts",
+						"updateUserBalance"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1"
+						},
+						{
+							"key": "balance",
+							"value": "500.8"
 						}
 					]
 				}
