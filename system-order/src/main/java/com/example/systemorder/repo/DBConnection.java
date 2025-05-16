@@ -13,8 +13,8 @@ import java.sql.SQLException;
 @Startup
 public class DBConnection {
     private static final String URL = "jdbc:mysql://localhost:3306/ordersdb";
-    private static final String USER = "root";
-    private static final String PASSWORD = "123456";
+    private static final String USER = "bakry";
+    private static final String PASSWORD = "TopG123";
 
     @PostConstruct
     public void init() {
